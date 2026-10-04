@@ -118,6 +118,8 @@ input[type=search]:focus-visible{outline:2px solid var(--b);outline-offset:2px}
 table.tc th:nth-child(2),table.tc td:nth-child(2){text-align:left}
 td.nm{text-align:left}
 .lp.ok{background:color-mix(in srgb,var(--ok) 18%,transparent);color:var(--ok)}
+.brstatus{margin-top:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;min-height:0}.brstatus:empty{display:none}
+.gar{color:var(--ok);font-weight:700;margin-left:4px}
 .lp.warn{background:color-mix(in srgb,var(--warn) 20%,transparent);color:var(--warn)}
 .demo{border:1px dashed var(--warn);color:var(--warn);padding:8px 12px;border-radius:6px;font-weight:600}
 @media (max-width:820px){
@@ -180,6 +182,7 @@ table.tc th,table.tc td{padding-inline:7px}
     </div>
     <div class="split" id="brSplit"><i class="sa" style="width:50%"></i><i class="sb" style="width:50%"></i></div>
     <div class="lead num" id="brLead"></div>
+    <div id="brStatus" class="brstatus"></div>
     <div class="prog">
       <div class="row"><span class="big num" id="brPst">—</span><span class="num" id="brSec" style="color:var(--ink2)"></span></div>
       <div class="bar"><i id="brBar" style="width:0%"></i></div>
@@ -278,10 +281,28 @@ function parseFile(d) {
   const carg = (d.carg || []).find(c => c.cd === "1") || (d.carg || [])[0];
   const cands = [];
   for (const a of carg?.agr || []) for (const p of a.par || []) for (const c of p.cand || [])
-    cands.push({ n: c.n, nm: c.nmu || c.nm || "", sg: p.sg || "", vap: num(c.vap) });
+    cands.push({ n: c.n, nm: c.nmu || c.nm || "", sg: p.sg || "", vap: num(c.vap), st: String(c.st || "").trim() });
   const s = d.s || {}, v = d.v || {};
   const pstRaw = s.pstn != null && s.pstn !== "" ? s.pstn : s.pst;
-  return { cands, vv: num(v.vv), st: num(s.st), ts: num(s.ts), pst: dec(pstRaw), ht: d.ht || d.hg || "", dt: d.dt || d.dg || "", tf: d.tf };
+  return { cands, vv: num(v.vv), st: num(s.st), ts: num(s.ts), pst: dec(pstRaw), ht: d.ht || d.hg || "", dt: d.dt || d.dg || "", tf: d.tf, esnt: restantes(d) };
+}
+// Teto de votos que ainda podem entrar = eleitores das seções ainda não totalizadas (campo e.esnt do TSE).
+// Se o campo não vier, vale Infinity: nada é dado como garantido sem esse número.
+function restantes(d) { const e = (d && d.e) || {}; return e.esnt != null && e.esnt !== "" ? num(e.esnt) : Infinity; }
+const ordenarCands = f => [...f.cands].sort((a, b) => b.vap - a.vap || (+a.n) - (+b.n));
+// 1º turno com maioria absoluta: "eleito" se passa de 50% mesmo que todos os votos que faltam sejam dos outros; "turno2" se ninguém mais chega a 50%
+function statusMaioria(f) {
+  const o = ordenarCands(f), top = o[0], vv = totalValidos(f);
+  if (!top || !(top.vap > 0) || !(vv > 0)) return null;
+  if (eleito(top.st)) return { kind: "eleito", cand: top, tse: true };
+  if (2 * top.vap > vv + f.esnt) return { kind: "eleito", cand: top, tse: false };
+  if (2 * top.vap + f.esnt <= vv) return { kind: "turno2" };
+  return null;
+}
+// vencedor já definido dentro de um estado (lidera por mais do que ainda pode entrar)
+function liderGarantido(f) {
+  const o = ordenarCands(f); if (!o[0] || !(o[0].vap > 0)) return null;
+  return !o[1] || o[0].vap - o[1].vap > f.esnt ? o[0] : null;
 }
 const totalValidos = f => f.vv || f.cands.reduce((s, c) => s + c.vap, 0);
 const votosDe = (f, n) => (f.cands.find(c => c.n === n) || { vap: 0 }).vap;
@@ -332,16 +353,18 @@ function parseCargo(d) {
   const carg = (d.carg || [])[0] || {};
   const cands = [], agrs = [];
   for (const a of carg.agr || []) {
-    const ag = { nm: a.nm || "", com: a.com || "", vag: num(a.vag), votos: 0, legenda: 0, eleitos: 0, porSg: {} };
+    const ag = { nm: a.nm || "", com: a.com || "", vag: num(a.vag), votos: 0, legenda: 0, eleitos: 0, porSg: {}, cands: [], proj: 0, gar: 0 };
     for (const p of a.par || []) {
       ag.votos += num(p.tvtn) + num(p.tvtl); ag.legenda += num(p.tvtl);
       for (const c of p.cand || []) {
         const pvRaw = c.pvapn != null && c.pvapn !== "" ? c.pvapn : c.pvap;
         const stc = String(c.st || "").trim(), sgc = p.sg || "—";
         if (eleito(stc)) { ag.eleitos++; ag.porSg[sgc] = (ag.porSg[sgc] || 0) + 1; }
-        cands.push({ n: c.n, nm: c.nmu || c.nm || "", sg: p.sg || "", vap: num(c.vap), pv: dec(pvRaw), st: stc });
+        const o = { n: c.n, nm: c.nmu || c.nm || "", sg: p.sg || "", vap: num(c.vap), pv: dec(pvRaw), st: stc, fl: "" };
+        ag.cands.push(o); cands.push(o);
       }
     }
+    ag.cands.sort((x, y) => y.vap - x.vap || (+x.n) - (+y.n));
     agrs.push(ag);
   }
   const vv = num((d.v || {}).vv);
@@ -349,8 +372,49 @@ function parseCargo(d) {
   cands.sort((a, b) => b.vap - a.vap || (+a.n) - (+b.n));
   agrs.sort((a, b) => b.votos - a.votos || a.nm.localeCompare(b.nm));
   const s = d.s || {};
-  return { cands, agrs, nv: num(carg.nv) || 1, qe: num(carg.qe), vv, st: num(s.st), ts: num(s.ts),
+  const out = { cands, agrs, nv: num(carg.nv) || 1, qe: num(carg.qe), vv, st: num(s.st), ts: num(s.ts), t2: false, esnt: restantes(d),
     pst: dec(s.pstn != null && s.pstn !== "" ? s.pstn : s.pst), ht: d.ht || d.hg || "", dt: d.dt || d.dg || "", tf: d.tf };
+  marcarCargo(out, String(parseInt(carg.cd, 10)));
+  return out;
+}
+// fl: "tse" = o TSE já marcou como eleito; "gar" = garantido matematicamente; "proj" = ocupa a vaga na contagem de hoje
+function marcarCargo(o, cd) {
+  const cands = o.cands, vagas = o.nv, esnt = o.esnt;
+  const tipo = ["6", "7", "8"].includes(cd) ? "prop" : cd === "3" ? "gov" : cd === "5" ? "sen" : vagas > 2 ? "prop" : null;
+  for (const c of cands) c.fl = eleito(c.st) ? "tse" : "";
+  if (tipo === "gov") {
+    const top = cands[0], vv = o.vv || cands.reduce((a, c) => a + c.vap, 0);
+    if (top && top.vap > 0 && vv > 0) {
+      if (2 * top.vap > vv + esnt) { if (!top.fl) top.fl = "gar"; }
+      else if (2 * top.vap + esnt <= vv) o.t2 = true;
+    }
+  } else if (tipo === "sen") {
+    const rmax = esnt * vagas, nx = cands[vagas]; // cada eleitor vota em até "vagas" candidatos
+    cands.slice(0, vagas).forEach(c => { if (c.vap > 0) { if (!c.fl && (!nx || c.vap - nx.vap > rmax)) c.fl = "gar"; } });
+  } else if (tipo === "prop") projetarProp(o, esnt);
+}
+// Deputados: cadeiras pela maior média (D'Hondt) sobre os votos de cada partido/federação.
+// Garantida: a j-ésima cadeira do partido fica com ele mesmo que todos os votos que faltam vão para os rivais.
+// Candidato garantido: está entre os "gar" primeiros do partido e a frente do próximo por mais do que ainda pode entrar.
+function projetarProp(o, rmax) {
+  const N = o.nv, ags = o.agrs, tot = ags.reduce((s, a) => s + a.votos, 0), tseFinal = ags.some(a => a.vag > 0);
+  const q = [];
+  for (const a of ags) { a.proj = 0; a.gar = 0; if (a.votos > 0) for (let k = 1; k <= N; k++) q.push([a.votos / k, a]); }
+  q.sort((x, y) => y[0] - x[0]); q.slice(0, N).forEach(([, a]) => a.proj++);
+  o.tseFinal = tseFinal;
+  for (const a of ags) {
+    if (tseFinal) { a.proj = a.vag; a.gar = a.vag; continue; }
+    for (let j = 1; j <= N && a.votos > 0; j++) {
+      const x = a.votos / j;
+      if (Math.floor((tot - a.votos + rmax) / x) + (j - 1) <= N - 1) a.gar = j; else break;
+    }
+    const cs = a.cands, nx = cs[a.gar];
+    cs.forEach((c, i) => {
+      if (!(c.vap > 0)) return;
+      if (i < a.proj && !c.fl) c.fl = "proj";
+      if (i < a.gar && c.fl !== "tse" && (!nx || c.vap - nx.vap > rmax)) c.fl = "gar";
+    });
+  }
 }
 const MINUSC = new Set(["da", "de", "do", "das", "dos", "e"]);
 function nomeBonito(t) {
@@ -361,34 +425,40 @@ const foldTxt = t => String(t || "").normalize("NFD").replace(/[̀-ͯ]/g, "").to
 const eleito = st => /eleit/i.test(st || "") && !/n[ãa]o eleit/i.test(st || "");
 const segundoTurno = st => /2[º°o]\s*turno|segundo turno/i.test(st || "");
 // situação de um estado em cargo majoritário: "vagas" primeiros colocados ocupam as vagas
-function situacaoMaj(cands, vagas) {
-  const n = cands.slice(0, vagas).filter(c => eleito(c.st)).length;
+function situacaoMaj(cands, vagas, d) {
+  const el = cands.slice(0, vagas).filter(c => c.fl === "tse" || c.fl === "gar" || eleito(c.st));
+  const mat = el.some(c => c.fl === "gar");
   if (vagas === 1) {
-    if (n) return { txt: "Eleito", kind: "ok" };
+    if (el.length) return { txt: mat ? "Eleito (matemático)" : "Eleito", kind: "ok" };
     if (cands[0] && segundoTurno(cands[0].st)) return { txt: "2º turno", kind: "warn" };
-  } else if (n) return { txt: n === vagas ? `${n} eleitos` : `${n} eleito${n > 1 ? "s" : ""}`, kind: n === vagas ? "ok" : "warn" };
+    if (d && d.t2) return { txt: "2º turno garantido", kind: "warn" };
+  } else if (el.length) {
+    const n = el.length;
+    return { txt: (n === vagas ? `${n} eleitos` : `${n} eleito${n > 1 ? "s" : ""}`) + (mat ? " (matemático)" : ""), kind: n === vagas ? "ok" : "warn" };
+  }
   return { txt: "Em apuração", kind: "n" };
 }
-// Senado: cadeiras por partido. "proj" = os 2 mais votados de cada estado hoje; "conf" = os que o TSE já marcou como eleitos
+// Senado: cadeiras por partido. "proj" = os 2 mais votados de cada estado hoje; "gar" = garantidos (matemático ou confirmados pelo TSE)
 function cadeirasSenado(files) {
   const m = {};
   for (const [uf, d] of Object.entries(files)) {
     if (!d || !d.cands.some(c => c.vap > 0)) continue;
-    d.cands.slice(0, 2).forEach(c => {
-      const k = c.sg || "—"; const p = (m[k] = m[k] || { sg: k, proj: 0, conf: 0, nomes: [] });
-      p.proj++; if (eleito(c.st)) p.conf++; p.nomes.push({ nm: c.nm, uf, conf: eleito(c.st) });
+    d.cands.slice(0, d.nv).forEach(c => {
+      const k = c.sg || "—"; const p = (m[k] = m[k] || { sg: k, proj: 0, gar: 0, nomes: [] });
+      const g = c.fl === "gar" || c.fl === "tse";
+      p.proj++; if (g) p.gar++; p.nomes.push({ nm: c.nm, uf, gar: g });
     });
   }
-  return Object.values(m).sort((a, b) => b.proj - a.proj || b.conf - a.conf || a.sg.localeCompare(b.sg));
+  return Object.values(m).sort((a, b) => b.gar - a.gar || b.proj - a.proj || a.sg.localeCompare(b.sg));
 }
-// Deputados no Brasil: soma dos estados, com cadeiras por sigla (candidatos que o TSE marcou como eleitos)
+// Deputados no Brasil: soma dos estados, com cadeiras por sigla
 function agregarNacional(files) {
   const por = {}, cands = []; let nv = 0, st = 0, ts = 0, vv = 0, n = 0;
   for (const [uf, d] of Object.entries(files)) {
     if (!d) continue; n++; nv += d.nv; st += d.st; ts += d.ts; vv += d.vv || d.cands.reduce((a, c) => a + c.vap, 0);
     for (const c of d.cands) {
-      cands.push({ ...c, uf }); const k = c.sg || "—"; const p = (por[k] = por[k] || { nm: k, com: "", votos: 0, legenda: 0, vag: 0, porSg: {} });
-      p.votos += c.vap; if (eleito(c.st)) p.vag++;
+      cands.push({ ...c, uf }); const k = c.sg || "—"; const p = (por[k] = por[k] || { nm: k, com: "", votos: 0, legenda: 0, vag: 0, gar: 0, porSg: {} });
+      p.votos += c.vap; if (c.fl) p.vag++; if (c.fl === "gar" || c.fl === "tse") p.gar++;
     }
   }
   const agrs = Object.values(por).sort((a, b) => b.vag - a.vag || b.votos - a.votos || a.nm.localeCompare(b.nm));
@@ -407,7 +477,7 @@ function demoFile(uf, passo) {
   const va = Math.round(vv * pa * 0.9), vb = Math.round(vv * pb * 0.9), vo = vv - va - vb;
   const pc = x => (vv ? (x / vv * 100).toFixed(2) : "0").replace(".", ",");
   return { ht: "18:" + pad(10 + passo * 5, 2) + ":00", dt: "04/10/2026",
-    s: { st: String(st), ts: String(ts), pstn: (st / ts * 100).toFixed(2).replace(".", ",") }, v: { vv: String(vv) },
+    s: { st: String(st), ts: String(ts), pstn: (st / ts * 100).toFixed(2).replace(".", ",") }, v: { vv: String(vv) }, e: { est: String(st * 200), esnt: String((ts - st) * 200) },
     carg: [{ cd: "1", agr: [{ par: [
       { sg: "PT", cand: [{ n: "13", nmu: "LULA", vap: String(va), pvapn: pc(va) }] },
       { sg: "PL", cand: [{ n: "22", nmu: "FLÁVIO BOLSONARO", vap: String(vb), pvapn: pc(vb) }] },
@@ -420,7 +490,7 @@ function demoCargo(uf, cargo, passo) {
   const ts = 700 + (h % 30) * 100, frac = Math.min(1, passo * (0.3 + (h % 7) / 20));
   const st = Math.round(ts * frac), vv = Math.round(st * 180), final = frac >= 1;
   const pc = v => (vv ? (v / vv * 100).toFixed(2) : "0").replace(".", ",");
-  const base = { ht: "18:" + pad(10 + passo * 5, 2) + ":00", dt: "04/10/2026", e: {},
+  const base = { ht: "18:" + pad(10 + passo * 5, 2) + ":00", dt: "04/10/2026", e: { est: String(st * 200), esnt: String((ts - st) * 200) },
     s: { st: String(st), ts: String(ts), pstn: (st / ts * 100).toFixed(2).replace(".", ",") }, v: { vv: String(vv) } };
   if (cargo === "3" || cargo === "5") {
     const n = cargo === "3" ? 4 : 6, w = Array.from({ length: n }, () => rnd() + 0.15), tot = w.reduce((a, b) => a + b, 0);
@@ -479,6 +549,13 @@ function render() {
   $("brSplit").innerHTML = `<i class="sa" style="width:${r.pa / tot * 100}%"></i><i class="sb" style="width:${r.pb / tot * 100}%"></i>`;
   const d = r.pa - r.pb;
   $("brLead").textContent = !comVoto ? "Aguardando os primeiros votos." : Math.abs(d) < 0.005 ? "Empate técnico" : `${nomeCurto(d > 0 ? A : B)} à frente por ${Math.abs(d).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} p.p. (${nf.format(Math.abs(r.a - r.b))} votos)`;
+  const sm = statusMaioria(br);
+  const dec = {}; for (const uf of [...UFS, "zz"]) { const f = state.files[uf]; const l = f && liderGarantido(f); if (l) dec[l.n] = (dec[l.n] || 0) + 1; }
+  const decTxt = [A, B].filter(Boolean).map(c => dec[c.n] ? `${nomeCurto(c)} ${dec[c.n]}` : "").filter(Boolean).join(" · ");
+  $("brStatus").innerHTML = (sm ? (sm.kind === "eleito"
+      ? `<span class="lp ok">${esc(nomeCurto(sm.cand))} eleito no 1º turno${sm.tse ? "" : " (matemático)"}</span>`
+      : `<span class="lp warn">2º turno garantido</span>`) : "")
+    + (decTxt ? ` <span class="sub">Estados com vencedor definido: ${esc(decTxt)}</span>` : "");
   $("brPst").textContent = pf(br.pst || r.pst) + " apurado";
   $("brSec").textContent = `${nf.format(br.st)} de ${nf.format(br.ts)} urnas (seções)`;
   $("brBar").style.width = Math.min(100, br.pst || r.pst) + "%";
@@ -506,9 +583,11 @@ function render() {
     if (!g || !g.vv) return `${nome}<td class="a">—</td><td class="b">—</td><td class="mini"></td><td><span class="lp n">${g ? "sem votos" : "sem dado"}</span></td><td class="ap num">${g ? pf(g.pst) : "—"}</td>`;
     const dd = g.pa - g.pb, t = g.pa + g.pb || 1;
     const lid = Math.abs(dd) < 0.005 ? `<span class="lp n">Empate</span>` : `<span class="lp ${dd > 0 ? "a" : "b"}">${esc(nomeCurto(dd > 0 ? A : B))} +${Math.abs(dd).toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}</span>`;
+    const lg = liderGarantido(state.files[uf]);
+    const lid2 = lg ? lid + ` <span class="gar" title="Vencedor já definido neste estado: a vantagem é maior que todos os votos que faltam apurar">✓</span>` : lid;
     return `${nome}<td class="a num">${pf(g.pa)}</td><td class="b num">${pf(g.pb)}</td>
       <td class="mini"><div class="split sm"><i class="sa" style="width:${g.pa / t * 100}%"></i><i class="sb" style="width:${g.pb / t * 100}%"></i></div></td>
-      <td>${lid}</td><td class="ap num"><div class="bar"><i style="width:${Math.min(100, g.pst)}%"></i></div>${pf(g.pst)}<span style="color:var(--ink2);font-size:.8rem"> · ${nf.format(g.st)}/${nf.format(g.ts)}</span></td>`;
+      <td>${lid2}</td><td class="ap num"><div class="bar"><i style="width:${Math.min(100, g.pst)}%"></i></div>${pf(g.pst)}<span style="color:var(--ink2);font-size:.8rem"> · ${nf.format(g.st)}/${nf.format(g.ts)}</span></td>`;
   }).map(h => `<tr>${h}</tr>`).join("");
   setUpd(`TSE: totalização ${br.ht || "—"} · lido às ${state.lido.toLocaleTimeString("pt-BR")}`);
 }
@@ -608,13 +687,13 @@ function montarMaj(tab) {
 }
 function renderSeats(tab) {
   const S = state.maj[tab.id], el = $("m-seats-" + tab.id); if (!el) return;
-  const cad = cadeirasSenado(S.files), tp = cad.reduce((a, x) => a + x.proj, 0), tc = cad.reduce((a, x) => a + x.conf, 0);
+  const cad = cadeirasSenado(S.files), tp = cad.reduce((a, x) => a + x.proj, 0), tg = cad.reduce((a, x) => a + x.gar, 0);
   el.innerHTML = `<h2>Cadeiras no Senado por partido</h2>
-    <div class="stats"><span><b class="num">${tp}</b> de ${UFS.length * 2} vagas com ocupante no placar de hoje</span><span><b class="num">${tc}</b> já marcadas como eleitas pelo TSE</span></div>
-    <div class="tw"><table class="st"><thead><tr><th>Partido</th><th>Cadeiras hoje</th><th>Eleitos pelo TSE</th><th>Senadores</th></tr></thead><tbody>${cad.map(x =>
-      `<tr><td class="nm"><b>${esc(x.sg)}</b></td><td class="num">${x.proj}</td><td class="num">${x.conf || "—"}</td><td class="nm" style="white-space:normal">${x.nomes.map(n =>
-        `${esc(nomeBonito(n.nm))} <span class="sub">${n.uf.toUpperCase()}${n.conf ? " · eleito" : ""}</span>`).join(" · ")}</td></tr>`).join("") || `<tr><td colspan="4" class="nm">Aguardando os primeiros votos.</td></tr>`}</tbody></table></div>
-    <div class="foot" style="margin-top:8px">“Cadeiras hoje” conta os 2 mais votados de cada estado e muda conforme a apuração avança. “Eleito” aparece quando o próprio TSE confirma.</div>`;
+    <div class="stats"><span><b class="num">${tg}</b> cadeiras já garantidas</span><span><b class="num">${tp}</b> na projeção de hoje (de ${UFS.length * 2})</span></div>
+    <div class="tw"><table class="st"><thead><tr><th>Partido</th><th>Garantidas</th><th>Projeção hoje</th><th>Senadores</th></tr></thead><tbody>${cad.map(x =>
+      `<tr><td class="nm"><b>${esc(x.sg)}</b></td><td class="num"><b>${x.gar || "—"}</b></td><td class="num">${x.proj}</td><td class="nm" style="white-space:normal">${x.nomes.map(n =>
+        `${esc(nomeBonito(n.nm))} <span class="sub">${n.uf.toUpperCase()}${n.gar ? " · garantido" : ""}</span>`).join(" · ")}</td></tr>`).join("") || `<tr><td colspan="4" class="nm">Aguardando os primeiros votos.</td></tr>`}</tbody></table></div>
+    <div class="foot" style="margin-top:8px"><b>Garantida</b>: a vantagem sobre o 3º colocado é maior que todos os votos que ainda podem entrar (eleitores das urnas não apuradas, 2 votos por eleitor), ou o TSE já confirmou. <b>Projeção</b>: os 2 mais votados de cada estado agora, muda durante a apuração.</div>`;
 }
 function renderMaj(tab) {
   const S = state.maj[tab.id], topN = tab.topN;
@@ -628,19 +707,19 @@ function renderMaj(tab) {
     apertado: (a, b) => (dif(a) ?? 1e9) - (dif(b) ?? 1e9),
     folgado: (a, b) => (dif(b) ?? -1e9) - (dif(a) ?? -1e9) };
   linhas.sort(ordem[S.sort]);
-  const tot = { st: 0, ts: 0, n: 0, ok: 0 };
-  for (const uf of UFS) { const d = S.files[uf]; if (!d) continue; tot.st += d.st; tot.ts += d.ts; tot.n++; if (situacaoMaj(d.cands, tab.vagas).kind === "ok") tot.ok++; }
+  const tot = { st: 0, ts: 0, n: 0, ok: 0, t2: 0 };
+  for (const uf of UFS) { const d = S.files[uf]; if (!d) continue; tot.st += d.st; tot.ts += d.ts; tot.n++; const sj = situacaoMaj(d.cands, tab.vagas, d); if (sj.kind === "ok") tot.ok++; if (d.t2) tot.t2++; }
   $("m-stats-" + tab.id).innerHTML = `<span><b class="num">${pf(tot.ts ? tot.st / tot.ts * 100 : 0)}</b> das urnas apuradas (${nf.format(tot.st)} de ${nf.format(tot.ts)})</span>
-    <span><b class="num">${tot.ok}</b> ${tab.vagas === 1 ? "estados com governador eleito" : "estados com as 2 vagas definidas"}</span><span>${tot.n} de 27 estados lidos</span>`;
+    <span><b class="num">${tot.ok}</b> ${tab.vagas === 1 ? "estados com governador eleito" : "estados com as vagas definidas"}</span>${tab.vagas === 1 ? `<span><b class="num">${tot.t2}</b> com 2º turno garantido</span>` : ""}<span>${tot.n} de 27 estados lidos</span>`;
   $("m-rows-" + tab.id).innerHTML = linhas.map(x => {
-    const d = x.d, aberto = S.open.has(x.uf), sit = d ? situacaoMaj(d.cands, tab.vagas) : { txt: "sem dado", kind: "n" };
+    const d = x.d, aberto = S.open.has(x.uf), sit = d ? situacaoMaj(d.cands, tab.vagas, d) : { txt: "sem dado", kind: "n" };
     const cels = Array.from({ length: topN }, (_, k) => { const c = tem(x) ? d.cands[k] : null;
       return `<td class="cd k${k + 1}${k === 2 ? " c3" : ""}">${c ? `<span class="nm1">${esc(nomeBonito(c.nm))}</span><span class="pc num">${pf(c.pv)}</span> <span class="sub">${esc(c.sg)}</span>` : "—"}</td>`; }).join("");
     const dv = dif(x);
     const ap = d ? `<div class="bar"><i style="width:${Math.min(100, d.pst)}%"></i></div>${pf(d.pst)}<br><span class="sub">${nf.format(d.st)}/${nf.format(d.ts)} urnas</span>` : "—";
     const main = `<tr class="main" data-uf="${x.uf}" tabindex="0" role="button" aria-expanded="${aberto}"><td class="uf">${esc(UF_NAMES[x.uf])}<small>${esc(x.reg)}</small><br class="sit-m"><span class="lp ${sit.kind} sit-m">${esc(sit.txt)}</span></td>${cels}<td class="num dc">${dv == null ? "—" : f1(dv)}</td><td class="sc"><span class="lp ${sit.kind}">${esc(sit.txt)}</span></td><td class="ap num">${ap}</td></tr>`;
     const det = aberto && d ? `<tr class="det"><td colspan="${topN + 4}"><div class="dl">${d.cands.slice(0, 12).map((c, i) =>
-      `<div><span>${i + 1}. ${esc(nomeBonito(c.nm))} <span class="sub">${esc(c.sg)} · ${esc(c.n)}${c.st ? " · " + esc(c.st) : ""}</span></span><span class="num"><b>${pf(c.pv)}</b> · ${nf.format(c.vap)} votos</span></div>`).join("")}</div></td></tr>` : "";
+      `<div><span>${i + 1}. ${esc(nomeBonito(c.nm))} <span class="sub">${esc(c.sg)} · ${esc(c.n)}${c.st ? " · " + esc(c.st) : c.fl === "gar" ? " · garantido" : ""}</span></span><span class="num"><b>${pf(c.pv)}</b> · ${nf.format(c.vap)} votos</span></div>`).join("")}</div></td></tr>` : "";
     return main + det;
   }).join("");
   renderSeats(tab);
@@ -704,41 +783,49 @@ function visaoProp(S) {
   }
   const d = S.data; if (!d) return null;
   return { br: false, nv: d.nv, qe: d.qe, st: d.st, ts: d.ts, pst: d.pst, vv: d.vv || d.cands.reduce((a, c) => a + c.vap, 0), cands: d.cands, n: 1,
-    agrs: d.agrs.map(a => ({ nm: a.nm, com: a.com, votos: a.votos, legenda: a.legenda, vag: a.vag || a.eleitos || 0, porSg: a.porSg })) };
+    agrs: d.agrs.map(a => ({ nm: a.nm, com: a.com, votos: a.votos, legenda: a.legenda, vag: a.proj, gar: a.gar, porSg: a.porSg })) };
+}
+const ehGar = c => c.fl === "gar" || c.fl === "tse";
+function pilulaCand(c) {
+  if (c.fl === "tse" || eleito(c.st)) return `<span class="lp ok">${esc(c.st || "Eleito")}</span>`;
+  if (c.fl === "gar") return `<span class="lp ok">Garantido</span>`;
+  if (c.fl === "proj") return `<span class="lp warn">Projetado</span>`;
+  return c.st ? `<span class="lp n">${esc(c.st)}</span>` : "—";
 }
 function renderProp(tab) {
   const S = state.prop[tab.id], v = visaoProp(S), id = tab.id;
   const stats = $("p-stats-" + id), agrEl = $("p-agr-" + id), candEl = $("p-cand-" + id);
   if (!v) { stats.innerHTML = "<span>Carregando…</span>"; agrEl.innerHTML = ""; candEl.innerHTML = ""; return; }
-  const vv = v.vv || 1, nEle = v.cands.filter(c => eleito(c.st)).length;
+  const vv = v.vv || 1, nEle = v.cands.filter(ehGar).length, nProj = v.cands.filter(c => c.fl).length;
+  const totGar = v.agrs.reduce((a, x) => a + (x.gar || 0), 0), totProj = v.agrs.reduce((a, x) => a + (x.vag || 0), 0);
   stats.innerHTML = `<span><b class="num">${v.nv}</b> vagas${v.br ? " no país" : ""}</span>${v.qe ? `<span>quociente eleitoral <b class="num">${nf.format(v.qe)}</b></span>` : ""}
     <span><b class="num">${pf(v.pst)}</b> apurado (${nf.format(v.st)} de ${nf.format(v.ts)} urnas)</span>
-    <span><b class="num">${nEle}</b> eleitos marcados pelo TSE</span>${v.br ? `<span>${v.n} de 27 estados lidos</span>` : ""}`;
+    <span><b class="num">${totGar}</b> cadeiras garantidas · <b class="num">${totProj}</b> na projeção</span>${v.br ? `<span>${v.n} de 27 estados lidos</span>` : ""}`;
   // partidos
   $("p-ah-" + id).textContent = v.br ? "Cadeiras por partido no Brasil" : "Cadeiras por partido";
-  $("p-ath-" + id).innerHTML = `<tr><th>${v.br ? "Partido" : "Partido / federação"}</th><th>${v.br ? "Votos nominais" : "Votos"}</th><th>%</th><th>Cadeiras</th></tr>`;
-  const anyVag = v.agrs.some(a => a.vag > 0), maxA = Math.max(1, ...v.agrs.map(a => a.votos));
+  $("p-ath-" + id).innerHTML = `<tr><th>${v.br ? "Partido" : "Partido / federação"}</th><th>${v.br ? "Votos nominais" : "Votos"}</th><th>%</th><th>Cadeiras<br><span class="sub">projeção</span></th><th>Garantidas</th></tr>`;
+  const maxA = Math.max(1, ...v.agrs.map(a => a.votos));
   agrEl.innerHTML = v.agrs.map(a => {
     const sg = Object.entries(a.porSg || {}); const sub = !v.br && sg.length > 1 ? `<span class="sub">${sg.map(([k, n]) => esc(k) + " " + n).join(" · ")}</span>` : "";
     return `<tr><td class="nm"><b>${esc(a.nm)}</b>${a.com && a.com !== a.nm ? `<span class="sub"> ${esc(a.com)}</span>` : ""}${sub ? "<br>" + sub : ""}<div class="bar"><i style="width:${a.votos / maxA * 100}%"></i></div></td>
-    <td class="num">${nf.format(a.votos)}${a.legenda ? `<br><span class="sub">${nf.format(a.legenda)} de legenda</span>` : ""}</td><td class="num">${pf(a.votos / vv * 100)}</td><td class="num"><b>${anyVag ? (a.vag || "—") : "—"}</b></td></tr>`;
+    <td class="num">${nf.format(a.votos)}${a.legenda ? `<br><span class="sub">${nf.format(a.legenda)} de legenda</span>` : ""}</td><td class="num">${pf(a.votos / vv * 100)}</td><td class="num"><b>${a.vag || "—"}</b></td><td class="num">${a.gar ? `<span class="lp ok">${a.gar}</span>` : "—"}</td></tr>`;
   }).join("");
-  $("p-an-" + id).textContent = anyVag
-    ? (v.br ? "Cadeiras = candidatos que o TSE marcou como eleitos, somados por partido. Votos nominais não incluem os votos de legenda." : "Cadeiras já distribuídas pelo TSE (quociente partidário e sobras). Em federação, a linha de baixo mostra quantas ficam com cada partido.")
-    : "O TSE ainda não distribuiu as cadeiras. Elas aparecem aqui assim que ele publicar.";
-  // candidatos: mais votados ou eleitos
+  $("p-an-" + id).innerHTML = "<b>Projeção</b>: distribuição das vagas pela maior média (D'Hondt) com os votos de hoje, estimativa nossa, sem as regras de desempenho individual e de barreira. <b>Garantida</b>: a cadeira continua do partido mesmo que todos os votos que faltam (eleitores das urnas não apuradas) vão para os rivais. Quando o TSE publica as vagas, usamos as dele." + (v.br ? " Votos nominais não incluem os de legenda." : "");
+  // candidatos: eleitos (garantidos), projeção ou mais votados
   let modo = S.modo, nota = "";
-  if (modo === "eleitos" && nEle === 0) { modo = "votados"; nota = "O TSE ainda não marcou candidatos como eleitos aqui, então mostro os mais votados. "; }
-  montarBotoes($("p-modo-" + id), [["eleitos", `Eleitos (${nEle})`], ["votados", "Mais votados"]], modo, k => { S.modo = k; renderProp(tab); });
+  if (modo === "eleitos" && nEle === 0) { modo = nProj ? "proj" : "votados"; nota = nProj ? "Ninguém está matematicamente garantido ainda, então mostro a projeção de hoje. " : "O TSE ainda não marcou candidatos como eleitos aqui, então mostro os mais votados. "; }
+  if (modo === "proj" && nProj === 0) modo = "votados";
+  montarBotoes($("p-modo-" + id), [["eleitos", `Eleitos (${nEle})`], ["proj", `Projeção (${nProj})`], ["votados", "Mais votados"]], modo, k => { S.modo = k; renderProp(tab); });
   const q = foldTxt(S.q.trim());
-  const todos = v.cands.map((c, i) => ({ ...c, rank: i + 1 })).filter(c => (modo === "votados" || eleito(c.st)) && (!q || foldTxt(c.nm + " " + c.sg + " " + c.n).includes(q)));
-  const mostra = todos.slice(0, modo === "eleitos" ? 1200 : 50);
-  $("p-ch-" + id).textContent = q ? "Resultado da busca" : modo === "eleitos" ? "Candidatos eleitos" : "Candidatos mais votados";
+  const filtro = c => modo === "votados" || (modo === "proj" ? c.fl : ehGar(c));
+  const todos = v.cands.map((c, i) => ({ ...c, rank: i + 1 })).filter(c => filtro(c) && (!q || foldTxt(c.nm + " " + c.sg + " " + c.n).includes(q)));
+  const mostra = todos.slice(0, modo === "votados" ? 50 : 1200);
+  $("p-ch-" + id).textContent = q ? "Resultado da busca" : modo === "eleitos" ? "Candidatos eleitos ou garantidos" : modo === "proj" ? "Projeção de eleitos" : "Candidatos mais votados";
   $("p-cth-" + id).innerHTML = `<tr><th>#</th><th>Candidato</th>${v.br ? "<th>UF</th>" : ""}<th>Votos</th><th>%</th><th>Situação</th></tr>`;
   candEl.innerHTML = mostra.length ? mostra.map(c => `<tr><td class="num">${c.rank}</td><td class="nm"><b>${esc(nomeBonito(c.nm))}</b> <span class="sub">${esc(c.sg)}<span class="nn"> · ${esc(c.n)}</span></span></td>${v.br ? `<td>${esc((c.uf || "").toUpperCase())}</td>` : ""}
-    <td class="num">${nf.format(c.vap)}</td><td class="num">${pf(c.vap / vv * 100)}</td><td>${c.st ? `<span class="lp ${eleito(c.st) ? "ok" : "n"}">${esc(c.st)}</span>` : "—"}</td></tr>`).join("")
+    <td class="num">${nf.format(c.vap)}</td><td class="num">${pf(c.vap / vv * 100)}</td><td>${pilulaCand(c)}</td></tr>`).join("")
     : `<tr><td colspan="${v.br ? 6 : 5}" class="nm">Nenhum candidato encontrado.</td></tr>`;
-  $("p-cn-" + id).textContent = `${nota}Mostrando ${mostra.length} de ${todos.length} candidatos${q ? " na busca" : ""}. “#” é a posição por votos${v.br ? " no Brasil" : ""}: quem tem menos votos pode ser eleito pela votação do partido.`;
+  $("p-cn-" + id).textContent = `${nota}Mostrando ${mostra.length} de ${todos.length} candidatos${q ? " na busca" : ""}. “#” é a posição por votos${v.br ? " no Brasil" : ""}: quem tem menos votos pode ser eleito pela votação do partido. “Projetado” é estimativa, não resultado oficial.`;
 }
 async function carregarProp(tab, forcar) {
   const S = state.prop[tab.id];
