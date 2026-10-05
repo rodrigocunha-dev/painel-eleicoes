@@ -360,7 +360,7 @@ function parseCargo(d) {
         const pvRaw = c.pvapn != null && c.pvapn !== "" ? c.pvapn : c.pvap;
         const stc = String(c.st || "").trim(), sgc = p.sg || "—";
         if (eleito(stc)) { ag.eleitos++; ag.porSg[sgc] = (ag.porSg[sgc] || 0) + 1; }
-        const o = { n: c.n, nm: c.nmu || c.nm || "", sg: p.sg || "", vap: num(c.vap), pv: dec(pvRaw), st: stc, fl: "" };
+        const o = { n: c.n, nm: c.nmu || c.nm || "", sg: p.sg || "", vap: num(c.vap), pv: dec(pvRaw), st: stc, dvt: String(c.dvt || ""), fl: "" };
         ag.cands.push(o); cands.push(o);
       }
     }
@@ -393,26 +393,44 @@ function marcarCargo(o, cd) {
     cands.slice(0, vagas).forEach(c => { if (c.vap > 0) { if (!c.fl && (!nx || c.vap - nx.vap > rmax)) c.fl = "gar"; } });
   } else if (tipo === "prop") projetarProp(o, esnt);
 }
+// Pior caso: quantas médias (votos/k) dos rivais podem ficar >= x se todos os "rmax" votos que faltam forem para eles
+function rivaisAcima(ags, a, x, rmax) {
+  if (!isFinite(rmax)) return Infinity;
+  let base = 0; const custos = [];
+  for (const r of ags) {
+    if (r === a || !(r.votos > 0)) continue;
+    base += Math.floor(r.votos / x); custos.push(x - (r.votos % x));
+  }
+  custos.sort((p, q) => p - q); let resto = rmax, extra = 0;
+  for (const c of custos) { if (c <= resto) { resto -= c; extra++; } else break; }
+  // depois do 1º acréscimo, cada nova média de um mesmo partido custa x votos; qualquer partido pode receber (inclusive um novo)
+  extra += Math.floor(resto / x);
+  return base + extra;
+}
 // Deputados: cadeiras pela maior média (D'Hondt) sobre os votos de cada partido/federação.
 // Garantida: a j-ésima cadeira do partido fica com ele mesmo que todos os votos que faltam vão para os rivais.
 // Candidato garantido: está entre os "gar" primeiros do partido e a frente do próximo por mais do que ainda pode entrar.
 function projetarProp(o, rmax) {
-  const N = o.nv, ags = o.agrs, tot = ags.reduce((s, a) => s + a.votos, 0), tseFinal = ags.some(a => a.vag > 0);
+  // O TSE publica as vagas por partido (agr.vag) ao vivo, mas só marca os candidatos como eleitos (st) no fim.
+  // Então: se ele já informou vagas, essas são a projeção; senão, calculo por D'Hondt.
+  const N = o.nv, ags = o.agrs, tot = ags.reduce((s, a) => s + a.votos, 0), usaVag = ags.some(a => a.vag > 0), final = o.tf === "s";
   const q = [];
   for (const a of ags) { a.proj = 0; a.gar = 0; if (a.votos > 0) for (let k = 1; k <= N; k++) q.push([a.votos / k, a]); }
-  q.sort((x, y) => y[0] - x[0]); q.slice(0, N).forEach(([, a]) => a.proj++);
-  o.tseFinal = tseFinal;
+  if (usaVag) ags.forEach(a => { a.proj = a.vag; });
+  else { q.sort((x, y) => y[0] - x[0]); q.slice(0, N).forEach(([, a]) => a.proj++); }
+  o.fonteVag = usaVag;
   for (const a of ags) {
-    if (tseFinal) { a.proj = a.vag; a.gar = a.vag; continue; }
-    for (let j = 1; j <= N && a.votos > 0; j++) {
+    if (final && usaVag) a.gar = a.vag;
+    else for (let j = 1; j <= N && a.votos > 0; j++) {
       const x = a.votos / j;
-      if (Math.floor((tot - a.votos + rmax) / x) + (j - 1) <= N - 1) a.gar = j; else break;
+      if (rivaisAcima(ags, a, x, rmax) + (j - 1) <= N - 1) a.gar = j; else break;
     }
-    const cs = a.cands, nx = cs[a.gar];
+    a.gar = Math.min(a.gar, a.proj);
+    const cs = a.cands.filter(c => !/anulad|indeferid|cassad|cancelad/i.test(c.dvt || "")), nx = cs[a.gar];
     cs.forEach((c, i) => {
       if (!(c.vap > 0)) return;
-      if (i < a.proj && !c.fl) c.fl = "proj";
-      if (i < a.gar && c.fl !== "tse" && (!nx || c.vap - nx.vap > rmax)) c.fl = "gar";
+      if (i < a.proj && !c.fl) c.fl = final && usaVag ? "tse" : "proj";
+      if (i < a.gar && c.fl !== "tse" && (!nx || c.vap - nx.vap > rmax)) c.fl = final && usaVag ? "tse" : "gar";
     });
   }
 }
@@ -456,9 +474,11 @@ function agregarNacional(files) {
   const por = {}, cands = []; let nv = 0, st = 0, ts = 0, vv = 0, n = 0;
   for (const [uf, d] of Object.entries(files)) {
     if (!d) continue; n++; nv += d.nv; st += d.st; ts += d.ts; vv += d.vv || d.cands.reduce((a, c) => a + c.vap, 0);
-    for (const c of d.cands) {
-      cands.push({ ...c, uf }); const k = c.sg || "—"; const p = (por[k] = por[k] || { nm: k, com: "", votos: 0, legenda: 0, vag: 0, gar: 0, porSg: {} });
-      p.votos += c.vap; if (c.fl) p.vag++; if (c.fl === "gar" || c.fl === "tse") p.gar++;
+    for (const c of d.cands) cands.push({ ...c, uf });
+    // soma por partido/federação (mesma unidade da tela de cada estado), então Brasil = soma exata dos estados
+    for (const a of d.agrs) {
+      const p = (por[a.nm] = por[a.nm] || { nm: a.nm, com: a.com, votos: 0, legenda: 0, vag: 0, gar: 0, porSg: {} });
+      p.votos += a.votos; p.legenda += a.legenda; p.vag += a.proj; p.gar += a.gar;
     }
   }
   const agrs = Object.values(por).sort((a, b) => b.vag - a.vag || b.votos - a.votos || a.nm.localeCompare(b.nm));
@@ -803,14 +823,14 @@ function renderProp(tab) {
     <span><b class="num">${totGar}</b> cadeiras garantidas · <b class="num">${totProj}</b> na projeção</span>${v.br ? `<span>${v.n} de 27 estados lidos</span>` : ""}`;
   // partidos
   $("p-ah-" + id).textContent = v.br ? "Cadeiras por partido no Brasil" : "Cadeiras por partido";
-  $("p-ath-" + id).innerHTML = `<tr><th>${v.br ? "Partido" : "Partido / federação"}</th><th>${v.br ? "Votos nominais" : "Votos"}</th><th>%</th><th>Cadeiras<br><span class="sub">projeção</span></th><th>Garantidas</th></tr>`;
+  $("p-ath-" + id).innerHTML = `<tr><th>Partido / federação</th><th>Votos</th><th>%</th><th>Cadeiras<br><span class="sub">projeção</span></th><th>Garantidas</th></tr>`;
   const maxA = Math.max(1, ...v.agrs.map(a => a.votos));
   agrEl.innerHTML = v.agrs.map(a => {
     const sg = Object.entries(a.porSg || {}); const sub = !v.br && sg.length > 1 ? `<span class="sub">${sg.map(([k, n]) => esc(k) + " " + n).join(" · ")}</span>` : "";
     return `<tr><td class="nm"><b>${esc(a.nm)}</b>${a.com && a.com !== a.nm ? `<span class="sub"> ${esc(a.com)}</span>` : ""}${sub ? "<br>" + sub : ""}<div class="bar"><i style="width:${a.votos / maxA * 100}%"></i></div></td>
     <td class="num">${nf.format(a.votos)}${a.legenda ? `<br><span class="sub">${nf.format(a.legenda)} de legenda</span>` : ""}</td><td class="num">${pf(a.votos / vv * 100)}</td><td class="num"><b>${a.vag || "—"}</b></td><td class="num">${a.gar ? `<span class="lp ok">${a.gar}</span>` : "—"}</td></tr>`;
   }).join("");
-  $("p-an-" + id).innerHTML = "<b>Projeção</b>: distribuição das vagas pela maior média (D'Hondt) com os votos de hoje, estimativa nossa, sem as regras de desempenho individual e de barreira. <b>Garantida</b>: a cadeira continua do partido mesmo que todos os votos que faltam (eleitores das urnas não apuradas) vão para os rivais. Quando o TSE publica as vagas, usamos as dele." + (v.br ? " Votos nominais não incluem os de legenda." : "");
+  $("p-an-" + id).innerHTML = "<b>Projeção</b>: distribuição das vagas pela maior média (D'Hondt) com os votos de hoje, estimativa nossa, sem as regras de desempenho individual e de barreira. <b>Garantida</b>: a cadeira continua do partido mesmo que todos os votos que faltam (eleitores das urnas não apuradas) vão para os rivais. Quando o TSE publica as vagas, usamos as dele." + (v.br ? "" : "");
   // candidatos: eleitos (garantidos), projeção ou mais votados
   let modo = S.modo, nota = "";
   if (modo === "eleitos" && nEle === 0) { modo = nProj ? "proj" : "votados"; nota = nProj ? "Ninguém está matematicamente garantido ainda, então mostro a projeção de hoje. " : "O TSE ainda não marcou candidatos como eleitos aqui, então mostro os mais votados. "; }
