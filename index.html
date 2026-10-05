@@ -112,7 +112,6 @@ table.tc th:nth-child(3),table.tc td:nth-child(3){text-align:left}
 input[type=search]{font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:7px 10px;min-width:0;flex:1 1 200px;max-width:340px}
 input[type=search]:focus-visible{outline:2px solid var(--b);outline-offset:2px}
 .two{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;align-items:start}
-@media (min-width:1080px){.two{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
 .sit-m{display:none}
 .two>*{min-width:0}
 table.tc th:nth-child(2),table.tc td:nth-child(2){text-align:left}
@@ -139,6 +138,22 @@ td.nm{text-align:left}
   table.mj td.cd{grid-row:2;padding-top:6px}
   table.mj tr.det,table.mj tr.det td{display:block}
 }
+@media (min-width:821px) and (max-width:1100px){
+  table.mj thead{display:none}
+  table.mj,table.mj tbody{display:block}
+  table.mj tr.main{display:grid;gap:2px 12px;padding:10px 0;border-bottom:1px solid var(--line)}
+  table.mj2 tr.main{grid-template-columns:1fr 1fr}
+  table.mj3 tr.main{grid-template-columns:1fr 1fr 1fr}
+  table.mj tr.main td{display:block;border:0;padding:0;text-align:left}
+  table.mj tr.main td.dc,table.mj tr.main td.sc{display:none}
+  table.mj td.uf{grid-column:1 / -2;grid-row:1}
+  table.mj td.ap{grid-column:-2 / -1;grid-row:1;text-align:right;font-weight:600}
+  table.mj td.ap::after{content:" apurado";color:var(--ink2);font-size:.8rem;font-weight:400}
+  table.mj td.ap br,table.mj td.ap .bar,table.mj td.ap .sub{display:none}
+  table.mj td.cd{grid-row:2;padding-top:6px}
+  table.mj tr.det,table.mj tr.det td{display:block}
+  .sit-m{display:inline-block;margin-top:3px}
+}
 @media (max-width:520px){
   .score{gap:10px} .panel{padding:14px}
   table{min-width:0;font-size:.82rem} th,td{padding:7px 3px} th{white-space:normal;line-height:1.1;font-size:.66rem;letter-spacing:.03em}
@@ -156,6 +171,38 @@ td.nm{text-align:left}
 }
 @media (max-width:380px){ table{font-size:.76rem} .lp{font-size:.66rem;padding:2px 4px} .cand .pct{font-size:2.3rem} }
 table.tc th,table.tc td{padding-inline:7px}
+@media (max-width:820px){table.tp{min-width:0}td.uf{white-space:normal}table.tp th{white-space:normal}}
+@media (min-width:521px) and (max-width:820px){table.tp th,table.tp td{padding-inline:6px}table.tp td.ap{white-space:normal}table.tp td.uf small{display:block;margin-left:0}}
+@media (max-width:360px){table.pt tr{grid-template-columns:1fr 1fr}table.pt td.nm{grid-column:1 / -1}}
+@media (max-width:340px){table.tp{font-size:.7rem}table.tp td,table.tp th{padding-inline:2px}}
+@media (max-width:400px){.tp td .lp{white-space:normal;line-height:1.15;display:inline-block;max-width:4.6rem}.tp td.uf{font-size:.9em}}
+@media (min-width:821px) and (max-width:1000px){table.tp td.ap span{display:block}.tp th:nth-child(4),.tp td.mini{display:none}}
+@media (max-width:520px){.tp td .gar{display:block;margin:2px 0 0}}
+table.st{min-width:0}table.st td.sen{min-width:240px;white-space:normal}
+/* telas estreitas: cada linha das tabelas de partidos, candidatos e senado vira um cartão, sem rolar para o lado */
+@media (max-width:820px){
+  table.cards,table.cards tbody{display:block;min-width:0;width:100%}
+  table.cards thead{display:none}
+  table.cards tr{display:grid;gap:3px 10px;padding:10px 0;border-bottom:1px solid var(--line);align-items:start}
+  table.cards td{display:block;border:0;padding:0;text-align:left;white-space:normal;min-width:0;overflow-wrap:anywhere}
+  table.cards td[data-label]::before{content:attr(data-label);display:block;color:var(--ink2);font-size:.68rem;letter-spacing:.03em;text-transform:uppercase;font-weight:500;overflow-wrap:normal;white-space:nowrap}
+  table.cards td .nn{display:inline}
+  table.cards td .lp{white-space:normal}
+  table.cards td.nm{grid-column:1 / -1}
+  table.pt tr{grid-template-columns:1.3fr 1fr .9fr 1.2fr}
+  table.pt td[data-label="Votos"]{grid-column:1}
+  table.pt td .sub{display:block}
+  table.tc tr{grid-template-columns:2.4rem 1fr 1fr 1fr}
+  table.tc td:first-child{grid-column:1;grid-row:1;color:var(--ink2);font-weight:600}
+  table.tc td.nm{grid-column:2 / -1;grid-row:1}
+  table.tc td[data-label="UF"]{grid-column:1;grid-row:2}
+  table.tc td[data-label="Votos"]{grid-column:2;grid-row:2}
+  table.tc td[data-label="% votos"]{grid-column:3;grid-row:2}
+  table.tc td[data-label="Situação"]{grid-column:4;grid-row:2}
+  table.st tr{grid-template-columns:1fr 1fr 1fr}
+  table.st td.nm:first-child{grid-column:1 / -1}
+  table.st td.sen{grid-column:1 / -1;font-size:.85rem;line-height:1.35}
+}
 @media (prefers-reduced-motion:no-preference){ .bar i,.split i{transition:width .5s ease} }
 </style>
 </head>
@@ -710,8 +757,8 @@ function renderSeats(tab) {
   const cad = cadeirasSenado(S.files), tp = cad.reduce((a, x) => a + x.proj, 0), tg = cad.reduce((a, x) => a + x.gar, 0);
   el.innerHTML = `<h2>Cadeiras no Senado por partido</h2>
     <div class="stats"><span><b class="num">${tg}</b> cadeiras já garantidas</span><span><b class="num">${tp}</b> na projeção de hoje (de ${UFS.length * 2})</span></div>
-    <div class="tw"><table class="st"><thead><tr><th>Partido</th><th>Garantidas</th><th>Projeção hoje</th><th>Senadores</th></tr></thead><tbody>${cad.map(x =>
-      `<tr><td class="nm"><b>${esc(x.sg)}</b></td><td class="num"><b>${x.gar || "—"}</b></td><td class="num">${x.proj}</td><td class="nm" style="white-space:normal">${x.nomes.map(n =>
+    <div class="tw"><table class="st cards"><thead><tr><th>Partido</th><th>Garantidas</th><th>Projeção hoje</th><th>Senadores</th></tr></thead><tbody>${cad.map(x =>
+      `<tr><td class="nm"><b>${esc(x.sg)}</b></td><td class="num" data-label="Garantidas"><b>${x.gar || "—"}</b></td><td class="num" data-label="Projeção hoje">${x.proj}</td><td class="nm sen" data-label="Senadores" style="white-space:normal">${x.nomes.map(n =>
         `${esc(nomeBonito(n.nm))} <span class="sub">${n.uf.toUpperCase()}${n.gar ? " · garantido" : ""}</span>`).join(" · ")}</td></tr>`).join("") || `<tr><td colspan="4" class="nm">Aguardando os primeiros votos.</td></tr>`}</tbody></table></div>
     <div class="foot" style="margin-top:8px"><b>Garantida</b>: a vantagem sobre o 3º colocado é maior que todos os votos que ainda podem entrar (eleitores das urnas não apuradas, 2 votos por eleitor), ou o TSE já confirmou. <b>Projeção</b>: os 2 mais votados de cada estado agora, muda durante a apuração.</div>`;
 }
@@ -786,9 +833,9 @@ function montarProp(tab) {
       <input type="search" id="p-q-${tab.id}" placeholder="Buscar candidato ou partido" aria-label="Buscar candidato ou partido"></div>
     <div class="stats" id="p-stats-${tab.id}"></div></section>
     <div class="two">
-      <section class="panel"><h2 id="p-ah-${tab.id}">Cadeiras por partido</h2><div class="tw" style="margin-top:10px"><table><thead id="p-ath-${tab.id}"></thead><tbody id="p-agr-${tab.id}"></tbody></table></div>
+      <section class="panel"><h2 id="p-ah-${tab.id}">Cadeiras por partido</h2><div class="tw" style="margin-top:10px"><table class="pt cards"><thead id="p-ath-${tab.id}"></thead><tbody id="p-agr-${tab.id}"></tbody></table></div>
         <div class="foot" id="p-an-${tab.id}" style="margin-top:8px"></div></section>
-      <section class="panel"><h2 id="p-ch-${tab.id}">Candidatos</h2><div class="tools" id="p-modo-${tab.id}"></div><div class="tw"><table class="tc"><thead id="p-cth-${tab.id}"></thead><tbody id="p-cand-${tab.id}"></tbody></table></div>
+      <section class="panel"><h2 id="p-ch-${tab.id}">Candidatos</h2><div class="tools" id="p-modo-${tab.id}"></div><div class="tw"><table class="tc cards"><thead id="p-cth-${tab.id}"></thead><tbody id="p-cand-${tab.id}"></tbody></table></div>
         <div class="foot" id="p-cn-${tab.id}" style="margin-top:8px"></div></section>
     </div>`;
   $("p-uf-" + tab.id).value = S.uf;
@@ -823,29 +870,29 @@ function renderProp(tab) {
     <span><b class="num">${totGar}</b> cadeiras garantidas · <b class="num">${totProj}</b> na projeção</span>${v.br ? `<span>${v.n} de 27 estados lidos</span>` : ""}`;
   // partidos
   $("p-ah-" + id).textContent = v.br ? "Cadeiras por partido no Brasil" : "Cadeiras por partido";
-  $("p-ath-" + id).innerHTML = `<tr><th>Partido / federação</th><th>Votos</th><th>%</th><th>Cadeiras<br><span class="sub">projeção</span></th><th>Garantidas</th></tr>`;
+  $("p-ath-" + id).innerHTML = `<tr><th>Partido / federação</th><th>Votos<br><span class="sub">total do partido</span></th><th>%</th><th>Cadeiras<br><span class="sub">projeção</span></th><th>Garantidas</th></tr>`;
   const maxA = Math.max(1, ...v.agrs.map(a => a.votos));
   agrEl.innerHTML = v.agrs.map(a => {
     const sg = Object.entries(a.porSg || {}); const sub = !v.br && sg.length > 1 ? `<span class="sub">${sg.map(([k, n]) => esc(k) + " " + n).join(" · ")}</span>` : "";
     return `<tr><td class="nm"><b>${esc(a.nm)}</b>${a.com && a.com !== a.nm ? `<span class="sub"> ${esc(a.com)}</span>` : ""}${sub ? "<br>" + sub : ""}<div class="bar"><i style="width:${a.votos / maxA * 100}%"></i></div></td>
-    <td class="num">${nf.format(a.votos)}${a.legenda ? `<br><span class="sub">${nf.format(a.legenda)} de legenda</span>` : ""}</td><td class="num">${pf(a.votos / vv * 100)}</td><td class="num"><b>${a.vag || "—"}</b></td><td class="num">${a.gar ? `<span class="lp ok">${a.gar}</span>` : "—"}</td></tr>`;
+    <td class="num" data-label="Votos">${nf.format(a.votos)}${a.legenda ? `<br><span class="sub">inclui ${nf.format(a.legenda)} votos de legenda</span>` : ""}</td><td class="num" data-label="% votos">${pf(a.votos / vv * 100)}</td><td class="num" data-label="Cadeiras"><b>${a.vag || "—"}</b></td><td class="num" data-label="Garantidas">${a.gar ? `<span class="lp ok">${a.gar}</span>` : "—"}</td></tr>`;
   }).join("");
   $("p-an-" + id).innerHTML = "<b>Projeção</b>: distribuição das vagas pela maior média (D'Hondt) com os votos de hoje, estimativa nossa, sem as regras de desempenho individual e de barreira. <b>Garantida</b>: a cadeira continua do partido mesmo que todos os votos que faltam (eleitores das urnas não apuradas) vão para os rivais. Quando o TSE publica as vagas, usamos as dele." + (v.br ? "" : "");
   // candidatos: eleitos (garantidos), projeção ou mais votados
   let modo = S.modo, nota = "";
   if (modo === "eleitos" && nEle === 0) { modo = nProj ? "proj" : "votados"; nota = nProj ? "Ninguém está matematicamente garantido ainda, então mostro a projeção de hoje. " : "O TSE ainda não marcou candidatos como eleitos aqui, então mostro os mais votados. "; }
   if (modo === "proj" && nProj === 0) modo = "votados";
-  montarBotoes($("p-modo-" + id), [["eleitos", `Eleitos (${nEle})`], ["proj", `Projeção (${nProj})`], ["votados", "Mais votados"]], modo, k => { S.modo = k; renderProp(tab); });
+  montarBotoes($("p-modo-" + id), [["eleitos", `Garantidos (${nEle})`], ["proj", `Projeção (${nProj})`], ["votados", "Mais votados"]], modo, k => { S.modo = k; renderProp(tab); });
   const q = foldTxt(S.q.trim());
   const filtro = c => modo === "votados" || (modo === "proj" ? c.fl : ehGar(c));
   const todos = v.cands.map((c, i) => ({ ...c, rank: i + 1 })).filter(c => filtro(c) && (!q || foldTxt(c.nm + " " + c.sg + " " + c.n).includes(q)));
   const mostra = todos.slice(0, modo === "votados" ? 50 : 1200);
-  $("p-ch-" + id).textContent = q ? "Resultado da busca" : modo === "eleitos" ? "Candidatos eleitos ou garantidos" : modo === "proj" ? "Projeção de eleitos" : "Candidatos mais votados";
+  $("p-ch-" + id).textContent = q ? "Resultado da busca" : modo === "eleitos" ? "Candidatos garantidos" : modo === "proj" ? "Projeção de eleitos" : "Candidatos mais votados";
   $("p-cth-" + id).innerHTML = `<tr><th>#</th><th>Candidato</th>${v.br ? "<th>UF</th>" : ""}<th>Votos</th><th>%</th><th>Situação</th></tr>`;
-  candEl.innerHTML = mostra.length ? mostra.map(c => `<tr><td class="num">${c.rank}</td><td class="nm"><b>${esc(nomeBonito(c.nm))}</b> <span class="sub">${esc(c.sg)}<span class="nn"> · ${esc(c.n)}</span></span></td>${v.br ? `<td>${esc((c.uf || "").toUpperCase())}</td>` : ""}
-    <td class="num">${nf.format(c.vap)}</td><td class="num">${pf(c.vap / vv * 100)}</td><td>${pilulaCand(c)}</td></tr>`).join("")
+  candEl.innerHTML = mostra.length ? mostra.map(c => `<tr><td class="num">${c.rank}</td><td class="nm"><b>${esc(nomeBonito(c.nm))}</b> <span class="sub">${esc(c.sg)}<span class="nn"> · ${esc(c.n)}</span></span></td>${v.br ? `<td data-label="UF">${esc((c.uf || "").toUpperCase())}</td>` : ""}
+    <td class="num" data-label="Votos">${nf.format(c.vap)}</td><td class="num" data-label="% votos">${pf(c.vap / vv * 100)}</td><td data-label="Situação">${pilulaCand(c)}</td></tr>`).join("")
     : `<tr><td colspan="${v.br ? 6 : 5}" class="nm">Nenhum candidato encontrado.</td></tr>`;
-  $("p-cn-" + id).textContent = `${nota}Mostrando ${mostra.length} de ${todos.length} candidatos${q ? " na busca" : ""}. “#” é a posição por votos${v.br ? " no Brasil" : ""}: quem tem menos votos pode ser eleito pela votação do partido. “Projetado” é estimativa, não resultado oficial.`;
+  $("p-cn-" + id).textContent = `${nota}Mostrando ${mostra.length} de ${todos.length} candidatos${q ? " na busca" : ""}. “#” é a posição por votos${v.br ? " no Brasil" : ""}: quem tem menos votos pode ser eleito pela votação do partido. “Garantido”: a distância para o próximo candidato do mesmo partido é maior que todos os votos que faltam. “Projetado”: ocupa uma das vagas que o partido tem hoje, mas ainda pode trocar de posição com quem está logo atrás.`;
 }
 async function carregarProp(tab, forcar) {
   const S = state.prop[tab.id];
