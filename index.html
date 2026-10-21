@@ -120,7 +120,6 @@ td.nm{text-align:left}
 .brstatus{margin-top:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;min-height:0}.brstatus:empty{display:none}
 .gar{color:var(--ok);font-weight:700;margin-left:4px}
 .lp.warn{background:color-mix(in srgb,var(--warn) 20%,transparent);color:var(--warn)}
-.demo{border:1px dashed var(--warn);color:var(--warn);padding:8px 12px;border-radius:6px;font-weight:600}
 @media (max-width:820px){
   .tp th:nth-child(4),.tp td.mini,.tp td.ap .bar,.tp td.ap span{display:none}
   .sit-m{display:inline-block;margin-top:3px}
@@ -339,7 +338,6 @@ details.fx .gm-feed,details.fx .feed{max-height:360px;overflow-y:auto;margin-top
     </div>
   </div>
   <nav class="tabs" id="tabs" aria-label="Cargo"></nav>
-  <div id="demoBanner" class="demo" hidden>Dados de exemplo para conferir o layout. Não são resultados reais.</div>
   <div id="notice" hidden></div>
 
   <div class="view" id="v-presidente">
@@ -403,7 +401,7 @@ details.fx .gm-feed,details.fx .feed{max-height:360px;overflow-y:auto;margin-top
 /* ======== LÓGICA (testada fora do navegador) ======== */
 // LOGIC-START
 const BASE = "https://resultados.tse.jus.br/oficial/";
-const REFRESH_S = typeof location !== "undefined" && new URLSearchParams(location.search).get("demo") === "2" ? 1.5 : 5; // aba Presidente a cada 5 s; demais abas a cada 10 s
+const REFRESH_S = 5; // aba Presidente a cada 5 s; demais abas a cada 10 s
 const UF_NAMES = {ac:"Acre",al:"Alagoas",am:"Amazonas",ap:"Amapá",ba:"Bahia",ce:"Ceará",df:"Distrito Federal",es:"Espírito Santo",go:"Goiás",ma:"Maranhão",mg:"Minas Gerais",ms:"Mato Grosso do Sul",mt:"Mato Grosso",pa:"Pará",pb:"Paraíba",pe:"Pernambuco",pi:"Piauí",pr:"Paraná",rj:"Rio de Janeiro",rn:"Rio Grande do Norte",ro:"Rondônia",rr:"Roraima",rs:"Rio Grande do Sul",sc:"Santa Catarina",se:"Sergipe",sp:"São Paulo",to:"Tocantins",zz:"Exterior"};
 const REGIOES = {
   "Norte":["ac","ap","am","pa","ro","rr","to"],
@@ -673,64 +671,12 @@ function agregarNacional(files) {
 }
 // LOGIC-END
 
-/* ======== DADOS DE EXEMPLO (só com ?demo=1) ======== */
-function demoFile(uf, passo) {
-  let h = 7; for (const ch of uf) h = (h * 31 + ch.charCodeAt(0)) % 997;
-  const ts = 800 + (h % 40) * 120, frac = Math.min(1, passo * (0.35 + (h % 7) / 20));
-  const st = Math.round(ts * frac), vv = Math.round(st * 190);
-  const inclina = ["rs","sc","pr","sp","mt","ms","go","df","ro","rr","ac","to"].includes(uf) ? -1 : 1;
-  const pa = 0.5 + inclina * (0.05 + (h % 11) / 100), pb = 0.46 - inclina * (0.03 + (h % 5) / 100);
-  const va = Math.round(vv * pa * 0.9), vb = Math.round(vv * pb * 0.9), vo = vv - va - vb;
-  const pc = x => (vv ? (x / vv * 100).toFixed(2) : "0").replace(".", ",");
-  return { ht: "18:" + pad(10 + passo * 5, 2) + ":00", dt: "04/10/2026",
-    s: { st: String(st), ts: String(ts), pstn: (st / ts * 100).toFixed(2).replace(".", ",") }, v: { vv: String(vv) }, e: { est: String(st * 200), esnt: String((ts - st) * 200) },
-    carg: [{ cd: "1", agr: [{ par: [
-      { sg: "PT", cand: [{ n: "13", nmu: "LULA", vap: String(va), pvapn: pc(va) }] },
-      { sg: "PL", cand: [{ n: "22", nmu: "FLÁVIO BOLSONARO", vap: String(vb), pvapn: pc(vb) }] },
-      { sg: "OUT", cand: [{ n: "55", nmu: "CAIADO", vap: String(vo), pvapn: pc(vo) }] } ] }] }] };
-}
-
-function demoCargo(uf, cargo, passo) {
-  let h = 11; for (const ch of uf + cargo) h = (h * 31 + ch.charCodeAt(0)) % 9973;
-  let x = h + 7; const rnd = () => (x = (x * 48271) % 2147483647) / 2147483647;
-  const ts = 700 + (h % 30) * 100, frac = Math.min(1, passo * (0.3 + (h % 7) / 20));
-  const st = Math.round(ts * frac), vv = Math.round(st * 180), final = frac >= 1;
-  const pc = v => (vv ? (v / vv * 100).toFixed(2) : "0").replace(".", ",");
-  const base = { ht: "18:" + pad(10 + passo * 5, 2) + ":00", dt: "04/10/2026", e: { est: String(st * 200), esnt: String((ts - st) * 200) },
-    s: { st: String(st), ts: String(ts), pstn: (st / ts * 100).toFixed(2).replace(".", ",") }, v: { vv: String(vv) } };
-  if (cargo === "3" || cargo === "5") {
-    const n = cargo === "3" ? 4 : 6, w = Array.from({ length: n }, () => rnd() + 0.15), tot = w.reduce((a, b) => a + b, 0);
-    const vs = w.map(v => Math.round(vv * v / tot * 0.95)).sort((a, b) => b - a);
-    const cands = vs.map((vap, i) => {
-      let sit = "";
-      if (final && cargo === "5" && i < 2) sit = "Eleito";
-      if (final && cargo === "3" && i === 0 && vap / vv > 0.5) sit = "Eleito";
-      else if (final && cargo === "3" && i < 2 && vs[0] / vv <= 0.5) sit = "2º turno";
-      return { n: String(10 + i), sqcand: String(i), nmu: `CANDIDATO ${String.fromCharCode(65 + i)} ${uf.toUpperCase()}`, vap: String(vap), pvapn: pc(vap), st: sit };
-    });
-    const grupos = cands.map((c, i) => ({ nm: "PARTIDO " + String.fromCharCode(65 + i), par: [{ sg: "P" + String.fromCharCode(65 + i), tvtn: c.vap, tvtl: "0", cand: [c] }] }));
-    return { ...base, carg: [{ cd: cargo, nv: cargo === "5" ? "2" : "1", agr: grupos }] };
-  }
-  const vagas = 8 + (h % 30), nAg = 6, pesos = Array.from({ length: nAg }, () => rnd() + 0.2), soma = pesos.reduce((a, b) => a + b, 0);
-  const agr = pesos.map((w, g) => {
-    const votosAg = Math.round(vv * w / soma), leg = Math.round(votosAg * 0.12), nom = votosAg - leg, nc = 10 + ((h + g) % 12);
-    const pp = Array.from({ length: nc }, (_, k) => 1 / (k + 1)), ps = pp.reduce((a, b) => a + b, 0);
-    const vag = Math.max(0, Math.round(vagas * w / soma));
-    const cand = pp.map((q, k) => { const vap = Math.round(nom * q / ps);
-      return { n: String(100 * (g + 1) + k), sqcand: g + "-" + k, nmu: `CANDIDATO ${String.fromCharCode(65 + g)}${k + 1} ${uf.toUpperCase()}`, vap: String(vap), pvapn: pc(vap), st: final ? (k < vag ? "Eleito" : "Suplente") : "" }; });
-    return { nm: "PARTIDO " + String.fromCharCode(65 + g), com: "", vag: String(vag), par: [{ sg: "P" + String.fromCharCode(65 + g), tvtn: String(nom), tvtl: String(leg), cand }] };
-  });
-  return { ...base, carg: [{ cd: cargo, nv: String(vagas), qe: String(Math.round(vv / vagas)), nmn: "Deputado", agr }] };
-}
-
 /* ======== TELA ======== */
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const pf = v => (isFinite(v) ? v : 0).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "%";
 const nf = new Intl.NumberFormat("pt-BR");
 const qs = new URLSearchParams(location.search);
-const DEMO2 = qs.get("demo") === "2";            // simulação da noite do 2º turno
-const DEMO = qs.get("demo") === "1" || DEMO2;
 const state = { ele: null, br: null, files: {}, par: [], sort: "regiao", passo: 1, lido: null,
   tab: "presidente", cfg: null, cfgAt: 0, passoC: 1,
   maj: { governador: { files: {}, open: new Set(), sort: "regiao" }, senador: { files: {}, open: new Set(), sort: "regiao" } },
@@ -888,8 +834,7 @@ function jogoPres(r, A, B) {
   const saldo = UFS.map(uf => { const f = state.files[uf]; if (!f) return null; const g = resumoFile(f, nA, nB); return { uf, d: g.a - g.b }; }).filter(Boolean);
   const top = sinal => saldo.filter(x => x.d * sinal > 0).sort((x, y) => (y.d - x.d) * sinal).slice(0, 3).map(x => `${x.uf.toUpperCase()} +${fmtCurto(Math.abs(x.d))}`).join(" · ");
   const ta = top(1), tb = top(-1);
-  const DEMO_SQ = { "13": "280002542548", "22": "280002551544" };   // fotos oficiais (1º turno) usadas no modo exemplo
-  const foto = c => { const sq = DEMO ? DEMO_SQ[c.n] : c.sq, ele = DEMO ? { ciclo: "ele2026", cd: "6257" } : state.ele; return sq && ele ? `${BASE}${ele.ciclo}/${ele.cd}/fotos/br/${sq}.jpeg` : ""; };
+  const foto = c => { const sq = c.sq, ele = state.ele; return sq && ele ? `${BASE}${ele.ciclo}/${ele.cd}/fotos/br/${sq}.jpeg` : ""; };
   GM.bat.set({ fotoA: foto(A), fotoB: foto(B), va: r.a, vb: r.b, numA: nA, numB: nB, nomeA: nomeCurto(A), nomeB: nomeCurto(B), win, apurado: br.pst || r.pst,
     rotApurado: `⏱ ${pf(br.pst || r.pst)} apurado · ${nf.format(br.st)} de ${nf.format(br.ts)} urnas<span class="sx"> (seções)</span>`, topA: ta ? "🔥 Top estados<br>" + esc(ta) : "", topB: tb ? "🔥 Top estados<br>" + esc(tb) : "" });
   const lead = !t ? "Aguardando os primeiros votos" : ladoBr < 0 ? "Empate" : `${esc(nomeCurto(ladoBr ? B : A))} ${win >= 0 ? "vence a batalha por" : "à frente por"} ${Math.abs(r.pa - r.pb).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} p.p. (${nf.format(Math.abs(r.a - r.b))} votos)`;
@@ -1004,73 +949,10 @@ function render() {
   try { jogoPres(r, A, B); } catch (e) { console.error(e); }
 }
 
-/* ===== simulação da noite do 2º turno (?demo=2) =====
-   Números fictícios. A apuração anda de 0% a 100% em SIM_MIN minutos (padrão 3; use &min=10 para mais lento).
-   Cada execução sorteia o resultado (&seed=123 repete o mesmo cenário). */
-const SIM = (() => {
-  const p = new URLSearchParams(location.search);
-  let seed = Number(p.get("seed")) || Math.floor(Math.random() * 1e6);
-  const rnd = () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
-  const seedUsado = seed;
-  seed = (seedUsado * 2654435761 + 12345) % 2147483647 || 1; for (let i = 0; i < 5; i++) rnd();   // embaralha sementes pequenas
-  const BASE_A = { ac:.36,al:.62,am:.52,ap:.50,ba:.70,ce:.68,df:.40,es:.43,go:.38,ma:.70,mg:.50,ms:.38,mt:.35,pa:.55,pb:.65,pe:.67,pi:.74,pr:.37,rj:.45,rn:.64,ro:.32,rr:.30,rs:.42,sc:.32,se:.66,sp:.44,to:.55,zz:.52 };
-  const ELEIT = { ac:600,al:2400,am:2700,ap:550,ba:11200,ce:6900,df:2200,es:2900,go:4900,ma:5000,mg:16300,ms:2000,mt:2500,pa:6000,pb:3100,pe:7000,pi:2600,pr:8500,rj:12800,rn:2600,ro:1300,rr:370,rs:8600,sc:5600,se:1700,sp:34700,to:1100,zz:700 }; // mil eleitores (aprox.)
-  const REG = { ac:"N",am:"N",ap:"N",pa:"N",ro:"N",rr:"N",to:"N",al:"NE",ba:"NE",ce:"NE",ma:"NE",pb:"NE",pe:"NE",pi:"NE",rn:"NE",se:"NE",df:"CO",go:"CO",ms:"CO",mt:"CO",es:"SE",mg:"SE",rj:"SE",sp:"SE",pr:"S",rs:"S",sc:"S",zz:"EX" };
-  const desvio = (rnd() - .5) * .08;            // empurra o país para um lado (±4 p.p.)
-  const uf = {};
-  for (const u of Object.keys(BASE_A)) {
-    const r = REG[u];
-    uf[u] = { final: Math.min(.85, Math.max(.15, BASE_A[u] + desvio + (rnd() - .5) * .04)),
-      vies: (rnd() - .5) * .12,                  // as primeiras urnas do estado puxam para um lado
-      atraso: (r === "S" || r === "SE" || r === "CO" ? .0 : r === "N" ? .05 : r === "EX" ? .15 : .09) + rnd() * .05,
-      dur: .55 + rnd() * .3, secoes: Math.round(ELEIT[u] * 1000 / 330), aptos: 330 };
-  }
-  const min = Number(p.get("min")) || 3, t0 = Date.now();
-  return { uf, seed: seedUsado, min, t0 };
-})();
-function demo2Files() {
-  const t = Math.min(1, (Date.now() - SIM.t0) / (SIM.min * 60000));
-  const liso = x => x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x);
-  const files = {}; const tot = { va: 0, vb: 0, st: 0, ts: 0, esnt: 0 };
-  for (const [u, c] of Object.entries(SIM.uf)) {
-    const fr = t >= 1 ? 1 : liso((t - c.atraso) / c.dur);
-    const st = Math.round(c.secoes * fr), V = st * c.aptos * .8 * .93;      // votos válidos já apurados
-    const share = st ? (c.final * fr + c.vies * (fr - fr * fr / 2)) / fr : c.final;
-    const va = Math.round(V * Math.min(.95, Math.max(.05, share))), vb = Math.round(V) - va;
-    const esnt = (c.secoes - st) * c.aptos;
-    tot.va += va; tot.vb += vb; tot.st += st; tot.ts += c.secoes; tot.esnt += esnt;
-    files[u] = demo2Raw(va, vb, st, c.secoes, esnt, t);
-  }
-  files.br = demo2Raw(tot.va, tot.vb, tot.st, tot.ts, tot.esnt, t);
-  return { files, t };
-}
-function demo2Raw(va, vb, st, ts, esnt, t) {
-  const vv = va + vb, pc = x => (vv ? (x / vv * 100).toFixed(2) : "0").replace(".", ",");
-  const min = Math.floor(t * 300), hh = 17 + Math.floor(min / 60), mm = min % 60;   // relógio fictício de 17:00 a 22:00
-  return { ht: `${hh}:${pad(mm, 2)}:00`, dt: "25/10/2026", tf: t >= 1 && st === ts ? "s" : "n",
-    s: { st: String(st), ts: String(ts), pstn: (ts ? st / ts * 100 : 0).toFixed(2).replace(".", ",") }, v: { vv: String(vv) },
-    e: { esnt: String(esnt), est: String(st * 330) },
-    carg: [{ cd: "1", agr: [{ par: [
-      { sg: "PT", cand: [{ n: "13", nmu: "LULA", vap: String(va), pvapn: pc(va) }] },
-      { sg: "PL", cand: [{ n: "22", nmu: "FLÁVIO BOLSONARO", vap: String(vb), pvapn: pc(vb) }] } ] }] }] };
-}
-
 let carregando = false;
 async function carregar() {
   if (carregando) return; carregando = true; $("refresh").disabled = true;
   try {
-    if (DEMO2) {
-      const { files } = demo2Files();
-      state.br = parseFile(files.br);
-      for (const uf of [...UFS, "zz"]) state.files[uf] = parseFile(files[uf]);
-      state.par = escolherPar(state.br); state.lido = new Date(); aviso(null); setPill("live", "Simulação"); render(); return;
-    }
-    if (DEMO) {
-      const passo = state.passo++ % 10 + 1;
-      state.br = parseFile(demoFile("br", passo));
-      for (const uf of [...UFS, "zz"]) state.files[uf] = parseFile(demoFile(uf, passo));
-      state.par = escolherPar(state.br); state.lido = new Date(); aviso(null); setPill("live", "Exemplo"); render(); return;
-    }
     if (!state.ele) {
       state.ele = escolherEleicao(await getJSON(BASE + "comum/config/ele-c.json", false, fetch.bind(window)), new Date());
       if (!state.ele) { aviso("<b>O TSE ainda não publicou a eleição de 2026.</b>A página tenta de novo sozinha a cada 10 segundos."); setPill("", "Aguardando"); return; }
@@ -1199,10 +1081,7 @@ async function carregarMaj(tab) {
   const S = state.maj[tab.id];
   try {
     let falhas = 0, naoDiv = 0;
-    if (DEMO) {
-      const passo = state.passoC++ % 10 + 1;
-      for (const uf of UFS) S.files[uf] = parseCargo(demoCargo(uf, tab.cargo, passo));
-    } else {
+    {
       const cfg = await obterCfg();
       const turno = (escolherEleicao(cfg, new Date()) || {}).t || "1";
       const res = await Promise.allSettled(UFS.map(async uf => {
@@ -1219,7 +1098,7 @@ async function carregarMaj(tab) {
     const ref = S.files[UFS.find(u => S.files[u])];
     setUpd(`TSE: totalização ${ref?.ht || "—"} · lido às ${hora()}`, tab.id);
     aviso(falhas ? `<b>${falhas} estado(s) sem leitura nesta rodada.</b>Ficam com a última leitura válida e a página tenta de novo.` : null, false, tab.id);
-    setPill("live", DEMO ? "Exemplo" : "Ao vivo", tab.id);
+    setPill("live", "Ao vivo", tab.id);
     renderMaj(tab);
   } catch (err) {
     setPill("err", "Falha na leitura", tab.id);
@@ -1305,8 +1184,7 @@ async function carregarProp(tab, forcar) {
   try {
     if (uf === "br") {
       const files = {}; let falhas = 0, naoDiv = 0;
-      if (DEMO) { const passo = state.passoC++ % 10 + 1; for (const u of UFS) files[u] = parseCargo(demoCargo(u, cargoDe(tab, u), passo)); }
-      else {
+      {
         const cfg = await obterCfg();
         const res = await Promise.allSettled(UFS.map(async u => {
           const cargo = cargoDe(tab, u), ele = eleicaoDe(cfg, u, cargo, "1");
@@ -1323,12 +1201,11 @@ async function carregarProp(tab, forcar) {
       if (uf !== S.uf) return;
       S.br = { files, at: Date.now() };
       aviso(falhas ? `<b>${falhas} estado(s) sem leitura nesta rodada.</b>Ficam com a última leitura válida.` : null, false, tab.id);
-      setPill("live", DEMO ? "Exemplo" : "Ao vivo", tab.id); setUpd(`Brasil lido às ${hora()}. Atualiza a cada 2 min`, tab.id);
+      setPill("live", "Ao vivo", tab.id); setUpd(`Brasil lido às ${hora()}. Atualiza a cada 2 min`, tab.id);
       renderProp(tab); return;
     }
     let d;
-    if (DEMO) d = parseCargo(demoCargo(uf, cargoDe(tab, uf), state.passoC++ % 10 + 1));
-    else {
+    {
       const cfg = await obterCfg(), cargo = cargoDe(tab, uf);
       const ele = eleicaoDe(cfg, uf, cargo, "1");
       if (!ele) { setPill("", "Aguardando", tab.id); aviso(`<b>O TSE ainda não listou este cargo para ${esc(UF_NAMES[uf])}.</b>A página tenta de novo sozinha a cada 10 segundos.`, false, tab.id); return; }
@@ -1336,7 +1213,7 @@ async function carregarProp(tab, forcar) {
       catch (e) { if ((e.status === 404 || e.status === 403) && !S.data) { setPill("", "Aguardando", tab.id); aviso("<b>O TSE ainda não divulgou este cargo.</b>A página tenta de novo sozinha a cada 10 segundos.", false, tab.id); return; } throw e; }
     }
     if (uf !== S.uf) return; // a pessoa trocou de estado durante a leitura
-    S.data = d; aviso(null, false, tab.id); setPill("live", DEMO ? "Exemplo" : "Ao vivo", tab.id);
+    S.data = d; aviso(null, false, tab.id); setPill("live", "Ao vivo", tab.id);
     setUpd(`TSE: totalização ${d.ht || "—"} · lido às ${hora()}`, tab.id);
     renderProp(tab);
   } catch (err) {
@@ -1378,8 +1255,6 @@ function modoVisual(m) {
 }
 document.querySelectorAll(".vsw button").forEach(b => b.onclick = () => modoVisual(b.dataset.modo));
 modoVisual((() => { try { return localStorage.getItem("modoVisual"); } catch (e) { return null; } })());
-$("demoBanner").hidden = !DEMO;
-if (DEMO2) $("demoBanner").innerHTML = `<b>Simulação da noite do 2º turno — números fictícios.</b> A apuração vai de 0% a 100% em ${SIM.min} min (cenário nº ${SIM.seed}). <a href="?demo=2">Recomeçar com outro resultado</a> · <a href="?demo=2&min=10">versão lenta (10 min)</a> · <a href="?demo=2&seed=${SIM.seed}">repetir este cenário</a>`;
 $("gmSnd").textContent = GM.som ? "🔊" : "🔇";
 $("gmSnd").onclick = () => { GM.som = !GM.som; try { localStorage.setItem("som", GM.som ? "1" : "0"); } catch (e) { /* ok */ } $("gmSnd").textContent = GM.som ? "🔊" : "🔇"; gmBip(700); };
 $("refresh").onclick = () => atualizar(true);
