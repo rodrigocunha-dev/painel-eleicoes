@@ -204,6 +204,49 @@ table.st{min-width:0}table.st td.sen{min-width:240px;white-space:normal}
   table.st td.sen{grid-column:1 / -1;font-size:.85rem;line-height:1.35}
 }
 @media (prefers-reduced-motion:no-preference){ .bar i,.split i{transition:width .5s ease} }
+
+/* ===== modo jogo ===== */
+.gm h2{margin-top:16px}
+.gm-vs{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:end}
+.gm-side{min-width:0}.gm-side.r{text-align:right}
+.gm-side .nm{font-family:var(--f-disp);font-weight:700;font-size:clamp(1.1rem,3.6vw,1.6rem);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gm-side .pc{font-family:var(--f-disp);font-weight:800;font-size:clamp(2.4rem,10vw,4.2rem);line-height:1}
+.gm-side .vt{color:var(--ink2);font-size:.85rem}
+.gm-side.a .pc{color:var(--a)}.gm-side.b .pc{color:var(--b)}
+.gm-x{font-family:var(--f-disp);font-weight:800;color:var(--ink2);padding-bottom:18px}
+.gm-rope{position:relative;height:28px;margin:16px 4px 6px;border-radius:99px;background:var(--track);overflow:visible}
+.gm-rope .fa,.gm-rope .fb{position:absolute;top:0;bottom:0;transition:width .8s cubic-bezier(.2,.9,.3,1)}
+.gm-rope .fa{left:0;background:var(--a);border-radius:99px 0 0 99px}.gm-rope .fb{right:0;background:var(--b);border-radius:0 99px 99px 0}
+.gm-rope .half{position:absolute;left:50%;top:-5px;bottom:-5px;border-left:2px dashed var(--ink2)}
+.gm-rope .mk{position:absolute;top:-7px;width:12px;height:42px;margin-left:-6px;border-radius:6px;background:var(--panel);border:2px solid var(--ink);box-shadow:0 0 12px rgba(0,0,0,.35);transition:left .8s cubic-bezier(.2,.9,.3,1)}
+.gm-lead{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;align-items:center;font-weight:700;margin-top:12px;text-align:center}
+.gm-seal{padding:3px 12px;border-radius:99px;background:var(--ok);color:#fff;font-weight:800;font-size:.8rem;letter-spacing:.04em;animation:gmpop .6s}
+@keyframes gmpop{0%{transform:scale(.4)}70%{transform:scale(1.2)}100%{transform:scale(1)}}
+.gm-hud{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.gm-hud div{border:1px solid var(--line);border-radius:10px;padding:8px 10px;min-width:0}
+.gm-hud small{display:block;color:var(--ink2);font-size:.75rem}.gm-hud b{font-family:var(--f-disp);font-size:clamp(1.2rem,4.5vw,1.6rem)}
+@media(max-width:560px){.gm-hud{grid-template-columns:1fr 1fr}.gm-hud div:last-child{grid-column:1/-1}}
+.gm-map{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;max-width:600px;margin:8px auto 0}
+.gm-tile{aspect-ratio:1;border-radius:9px;border:0;padding:0;color:#fff;font-family:var(--f-disp);font-weight:800;font-size:clamp(.75rem,2.6vw,1.05rem);display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;cursor:pointer;background:var(--track);transition:transform .15s}
+.gm-tile.vazio{color:var(--ink2)}
+.gm-tile small{font-weight:600;font-size:clamp(.55rem,1.8vw,.72rem);opacity:.92}
+.gm-tile:hover{transform:scale(1.07)}
+.gm-tile.dec::after{content:"✓";position:absolute;top:1px;right:5px;font-size:.7rem}
+.gm-tile.fl{animation:gmfl 1.3s}
+@keyframes gmfl{30%{transform:scale(1.28);box-shadow:0 0 20px var(--ink)}}
+.gm-leg{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;font-size:.8rem;color:var(--ink2);margin-top:8px}
+.gm-leg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:middle}
+.gm-det{max-width:600px;margin:10px auto 0;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:.92rem}
+.gm-feed{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.gm-ev{border:1px solid var(--line);border-left:5px solid var(--ink2);border-radius:8px;padding:7px 10px;font-size:.92rem;display:flex;gap:10px;align-items:baseline}
+.gm-ev time{color:var(--ink2);font-size:.78rem;white-space:nowrap}
+.gm-pal{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:14px;border:2px dashed var(--line);border-radius:12px;padding:10px 12px}
+.gm-pal a{font-weight:700;color:var(--b)}
+.gm-toast{position:fixed;left:50%;top:12px;transform:translate(-50%,-140px);background:var(--panel);color:var(--ink);border:2px solid var(--ink);border-radius:12px;padding:10px 16px;font-weight:700;z-index:50;transition:transform .4s;max-width:92vw;text-align:center;box-shadow:0 8px 30px rgba(0,0,0,.25)}
+.gm-toast.on{transform:translate(-50%,0)}
+.gm-cf{position:fixed;top:-14px;width:9px;height:14px;z-index:49;pointer-events:none;animation:gmfall 3.2s linear forwards}
+@keyframes gmfall{to{transform:translateY(105vh) rotate(720deg)}}
+@media (prefers-reduced-motion:reduce){.gm-cf{display:none}.gm-rope .fa,.gm-rope .fb,.gm-rope .mk{transition:none}}
 </style>
 </head>
 <body>
@@ -213,6 +256,7 @@ table.st{min-width:0}table.st td.sen{min-width:240px;white-space:normal}
     <div class="meta">
       <span class="pill" id="pill"><i></i><span id="pillTxt">Conectando</span></span>
       <span id="upd">—</span>
+      <button type="button" id="gmSnd" title="Som dos eventos">🔇</button>
       <button type="button" id="refresh">Atualizar agora</button>
     </div>
   </div>
@@ -221,6 +265,18 @@ table.st{min-width:0}table.st td.sen{min-width:240px;white-space:normal}
   <div id="notice" hidden></div>
 
   <div class="view" id="v-presidente">
+  <section class="panel gm" aria-labelledby="hGm">
+    <h2 id="hGm">Disputa ao vivo</h2>
+    <div id="gmArena" style="margin-top:12px"></div>
+    <div class="gm-hud" id="gmHud"></div>
+    <h2>Mapa de territórios</h2>
+    <div class="gm-map" id="gmMap"></div>
+    <div class="gm-leg" id="gmLeg"></div>
+    <div class="gm-det" id="gmDet" hidden></div>
+    <h2>Viradas e conquistas</h2>
+    <div class="gm-feed" id="gmFeed"></div>
+    <div class="gm-pal" id="gmPal" hidden><span>🎯 <b>Palpite da galera:</b> aposte em quem leva o Brasil, cada estado e os governadores, e dispute o ranking.</span><a id="gmPalLink" href="#" target="_blank" rel="noopener">Fazer meu palpite →</a></div>
+  </section>
   <section class="panel" aria-labelledby="hBr">
     <h2 id="hBr">Brasil</h2>
     <div class="score" style="margin-top:12px">
@@ -257,14 +313,14 @@ table.st{min-width:0}table.st td.sen{min-width:240px;white-space:normal}
   <div class="view" id="v-federal" hidden></div>
   <div class="view" id="v-estadual" hidden></div>
 
-  <div class="foot">Fonte: arquivos públicos de divulgação do TSE (resultados.tse.jus.br), lidos pelo seu navegador a cada 30 segundos. Exterior aparece no total do Brasil e na última linha da tabela. Conferência oficial: <a href="https://resultados.tse.jus.br" target="_blank" rel="noopener">resultados.tse.jus.br</a>.</div>
+  <div class="foot">Fonte: arquivos públicos de divulgação do TSE (resultados.tse.jus.br), lidos pelo seu navegador a cada 5 segundos (presidente) ou 10 segundos (demais cargos). Exterior aparece no total do Brasil e na última linha da tabela. Conferência oficial: <a href="https://resultados.tse.jus.br" target="_blank" rel="noopener">resultados.tse.jus.br</a>.</div>
 </div>
 
 <script>
 /* ======== LÓGICA (testada fora do navegador) ======== */
 // LOGIC-START
 const BASE = "https://resultados.tse.jus.br/oficial/";
-const REFRESH_S = 30;
+const REFRESH_S = 5; // aba Presidente a cada 5 s; demais abas a cada 10 s
 const UF_NAMES = {ac:"Acre",al:"Alagoas",am:"Amazonas",ap:"Amapá",ba:"Bahia",ce:"Ceará",df:"Distrito Federal",es:"Espírito Santo",go:"Goiás",ma:"Maranhão",mg:"Minas Gerais",ms:"Mato Grosso do Sul",mt:"Mato Grosso",pa:"Pará",pb:"Paraíba",pe:"Pernambuco",pi:"Piauí",pr:"Paraná",rj:"Rio de Janeiro",rn:"Rio Grande do Norte",ro:"Rondônia",rr:"Roraima",rs:"Rio Grande do Sul",sc:"Santa Catarina",se:"Sergipe",sp:"São Paulo",to:"Tocantins",zz:"Exterior"};
 const REGIOES = {
   "Norte":["ac","ap","am","pa","ro","rr","to"],
@@ -600,6 +656,86 @@ function setPill(kind, txt, tab = "presidente") { if (state.tab !== tab) return;
 function setUpd(txt, tab = "presidente") { if (state.tab !== tab) return; $("upd").textContent = txt; }
 function aviso(html, err, tab = "presidente") { if (state.tab !== tab) return; const n = $("notice"); n.hidden = !html; n.className = "notice" + (err ? " err" : ""); n.innerHTML = html || ""; }
 
+/* ===== MODO JOGO ===== */
+const PALPITES_URL = "";   // endereço do site Urnas ao Vivo (ex.: "https://urnas-ao-vivo.vercel.app/#pal"); vazio = esconde o convite
+const GM_POS = {rr:[2,0],ap:[4,0],am:[1,1],pa:[3,1],ma:[4,1],pi:[5,1],ce:[6,1],rn:[7,1],ac:[0,2],ro:[1,2],mt:[2,2],to:[3,2],ba:[5,2],pe:[6,2],pb:[7,2],ms:[2,3],go:[3,3],df:[4,3],mg:[5,3],al:[6,3],se:[7,3],pr:[3,4],sp:[4,4],rj:[5,4],es:[6,4],sc:[3,5],rs:[3,6],zz:[6,6]};
+const GM = { som: false, lid: {}, dec: new Set(), feed: [], ini: false, majLid: {}, majDec: new Set(), majIni: false, sel: null };
+try { GM.som = localStorage.getItem("som") === "1"; } catch (e) { /* sem armazenamento */ }
+function gmToast(txt) { const t = $("gmToast"); t.textContent = txt; t.classList.add("on"); clearTimeout(gmToast.h); gmToast.h = setTimeout(() => t.classList.remove("on"), 4500); }
+function gmBip(fr = 660, d = .15) { if (!GM.som) return; try { const c = gmBip.c || (gmBip.c = new (window.AudioContext || window.webkitAudioContext)()), o = c.createOscillator(), g = c.createGain(); o.frequency.value = fr; g.gain.value = .08; o.connect(g); g.connect(c.destination); o.start(); o.stop(c.currentTime + d); } catch (e) { /* ok */ } }
+function gmConfete() { if (matchMedia("(prefers-reduced-motion:reduce)").matches) return; const cs = getComputedStyle(document.documentElement); const cores = [cs.getPropertyValue("--a"), cs.getPropertyValue("--b"), cs.getPropertyValue("--ok"), "#ffc83d"]; for (let i = 0; i < 70; i++) { const e = document.createElement("span"); e.className = "gm-cf"; e.style.left = Math.random() * 100 + "vw"; e.style.background = cores[i % 4]; e.style.animationDelay = Math.random() * .8 + "s"; document.body.appendChild(e); setTimeout(() => e.remove(), 4500); } }
+function gmEvento(txt, cor, aviso, fr) { GM.feed.unshift({ t: new Date(), txt, cor }); GM.feed = GM.feed.slice(0, 30); if (aviso) { gmToast(aviso); gmBip(fr); } renderFeed(); }
+function renderFeed() {
+  const el = $("gmFeed"); if (!el) return;
+  el.innerHTML = GM.feed.length ? GM.feed.map(e => `<div class="gm-ev" style="border-left-color:${e.cor}"><time>${e.t.toLocaleTimeString("pt-BR")}</time><span>${e.txt}</span></div>`).join("")
+    : '<div class="gm-ev"><span class="sub">As viradas e os estados garantidos aparecem aqui assim que acontecerem (a partir do momento em que você abriu a página).</span></div>';
+}
+function gmLado(g) { if (!g || !g.vv) return -1; return g.a === g.b ? -1 : (g.a > g.b ? 0 : 1); }
+function jogoPres(r, A, B) {
+  if (!A || !B) return;
+  const nA = A.n, nB = B.n, br = state.br, cor = i => i === 0 ? "var(--a)" : i === 1 ? "var(--b)" : "var(--track)";
+  const t = r.a + r.b, pa = t ? r.a / t * 100 : 50, pb = t ? r.b / t * 100 : 50;
+  const lgBr = liderGarantido(br), fim = br.tf === "s";
+  const ladoBr = r.a === r.b ? -1 : (r.a > r.b ? 0 : 1);
+  const lead = !t ? "Aguardando os primeiros votos" : ladoBr < 0 ? "Empate" : `${esc(nomeCurto(ladoBr ? B : A))} lidera por ${nf.format(Math.abs(r.a - r.b))} votos`;
+  $("gmArena").innerHTML = `<div class="gm-vs"><div class="gm-side a"><div class="nm">${esc(nomeCurto(A))}</div><div class="pc num">${t ? pf(r.pa) : "—"}</div><div class="vt num">${nf.format(r.a)} votos</div></div>
+    <div class="gm-x">×</div><div class="gm-side b r"><div class="nm">${esc(nomeCurto(B))}</div><div class="pc num">${t ? pf(r.pb) : "—"}</div><div class="vt num">${nf.format(r.b)} votos</div></div></div>
+    <div class="gm-rope"><i class="fa" style="width:${pa}%"></i><i class="fb" style="width:${pb}%"></i><span class="half"></span><span class="mk" style="left:${pa}%"></span></div>
+    <div class="gm-lead"><span>${lead}</span>${lgBr ? `<span class="gm-seal">${fim ? "VENCEDOR" : "RESULTADO GARANTIDO"}</span>` : ""}</div>`;
+  // mapa + placar de estados
+  let la = 0, lb = 0, ga = 0, gb = 0;
+  const tiles = Object.keys(GM_POS).map(uf => {
+    const f = state.files[uf], g = f ? resumoFile(f, nA, nB) : null, lado = gmLado(g), lg = f && liderGarantido(f);
+    const gar = lg && (lg.n === nA || lg.n === nB);
+    if (uf !== "zz") { if (lado === 0) { la++; if (gar) ga++; } else if (lado === 1) { lb++; if (gar) gb++; } }
+    const marg = g && g.vv ? Math.abs(g.pa - g.pb) : 0, al = Math.round(Math.min(1, .45 + marg / 25) * 100);
+    const bg = lado < 0 ? "" : `background:color-mix(in srgb,${cor(lado)} ${al}%,var(--panel))`;
+    // viradas e conquistas
+    if (g && g.vv >= 500 && lado >= 0) {
+      const ant = GM.lid[uf]; GM.lid[uf] = lado;
+      if (GM.ini && ant != null && ant !== lado) { const nm = nomeCurto(lado ? B : A); gmEvento(`🔄 ${esc(nm)} virou em <b>${esc(UF_NAMES[uf])}</b>`, cor(lado), `🔄 ${nm} virou em ${UF_NAMES[uf]}`, 520); GM.flash = uf; }
+    }
+    if (gar && !GM.dec.has(uf)) { GM.dec.add(uf); if (GM.ini) { const nm = nomeCurto(lg.n === nA ? A : B); gmEvento(`🏁 ${esc(nm)} garantiu <b>${esc(UF_NAMES[uf])}</b>`, cor(lg.n === nA ? 0 : 1), `🏁 ${nm} garantiu ${UF_NAMES[uf]}`, 740); } }
+    return `<button type="button" class="gm-tile${lado < 0 ? " vazio" : ""}${gar ? " dec" : ""}${GM.flash === uf ? " fl" : ""}" data-uf="${uf}" style="grid-column:${GM_POS[uf][0] + 1};grid-row:${GM_POS[uf][1] + 1};${bg}" title="${esc(UF_NAMES[uf])}">${uf.toUpperCase()}<small>${g && g.vv ? pf(Math.max(g.pa, g.pb)).replace(",00%", "%") : "—"}</small></button>`;
+  }).join("");
+  GM.flash = null;
+  if (t >= 1000 && ladoBr >= 0) { const ant = GM.lid.br; GM.lid.br = ladoBr; if (GM.ini && ant != null && ant !== ladoBr) { const nm = nomeCurto(ladoBr ? B : A); gmEvento(`🔄 ${esc(nm)} assumiu a liderança no <b>Brasil</b>`, cor(ladoBr), `🔄 ${nm} assumiu a liderança no Brasil!`, 880); } }
+  if (lgBr && !GM.dec.has("br")) { GM.dec.add("br"); if (GM.ini) { const nm = nomeCurto(lgBr.n === nA ? A : B); gmEvento(`🏆 ${esc(nm)} garantiu <b>o Brasil</b>`, cor(lgBr.n === nA ? 0 : 1), `🏆 ${nm} garantiu a vitória no Brasil!`, 990); gmConfete(); } }
+  $("gmMap").innerHTML = tiles;
+  $("gmMap").querySelectorAll(".gm-tile").forEach(b => b.onclick = () => { GM.sel = GM.sel === b.dataset.uf ? null : b.dataset.uf; gmDetalhe(A, B); });
+  $("gmLeg").innerHTML = `<span><i style="background:var(--a)"></i>${esc(nomeCurto(A))}</span><span><i style="background:var(--b)"></i>${esc(nomeCurto(B))}</span><span><i style="background:var(--track)"></i>sem votos / empate</span><span>✓ vencedor garantido</span>`;
+  $("gmHud").innerHTML = `<div><small>Estados liderando</small><b><span style="color:var(--a)">${la}</span> × <span style="color:var(--b)">${lb}</span></b></div>
+    <div><small>Estados garantidos</small><b><span style="color:var(--a)">${ga}</span> × <span style="color:var(--b)">${gb}</span></b></div>
+    <div><small>Urnas apuradas (TSE)</small><b>${pf(br.pst || r.pst)}</b></div>`;
+  gmDetalhe(A, B);
+  if (PALPITES_URL) { $("gmPal").hidden = false; $("gmPalLink").href = PALPITES_URL; }
+  if (!GM.ini) { GM.ini = true; renderFeed(); }
+}
+function gmDetalhe(A, B) {
+  const el = $("gmDet"), uf = GM.sel, f = uf && state.files[uf];
+  if (!f) { el.hidden = true; return; }
+  const g = resumoFile(f, A.n, B.n), lg = liderGarantido(f);
+  el.hidden = false;
+  el.innerHTML = `<b>${esc(UF_NAMES[uf])}</b>${lg ? ' <span class="gm-seal">GARANTIDO</span>' : ""}<br>
+    <span style="color:var(--a)">${esc(nomeCurto(A))}: <b>${pf(g.pa)}</b> (${nf.format(g.a)})</span> · <span style="color:var(--b)">${esc(nomeCurto(B))}: <b>${pf(g.pb)}</b> (${nf.format(g.b)})</span><br>
+    <span class="sub">${pf(g.pst)} apurado · ${nf.format(g.st)} de ${nf.format(g.ts)} urnas</span>`;
+}
+function jogoMaj(tab) {
+  if (tab.vagas !== 1) return;   // só governador
+  const S = state.maj[tab.id];
+  for (const uf of UFS) {
+    const d = S.files[uf]; if (!d || !d.cands.length || !(d.cands[0].vap > 0)) continue;
+    const c0 = d.cands[0], c1 = d.cands[1], k = tab.id + uf;
+    if (c1 && c0.vap > c1.vap && d.vv >= 500) {
+      const ant = GM.majLid[k]; GM.majLid[k] = c0.n;
+      if (GM.majIni && ant && ant !== c0.n) gmEvento(`🔄 ${esc(nomeBonito(c0.nm))} virou na disputa pelo governo de <b>${esc(UF_NAMES[uf])}</b>`, "var(--c1)", `🔄 ${nomeBonito(c0.nm)} virou em ${UF_NAMES[uf]} (governador)`, 600);
+    }
+    const sit = situacaoMaj(d.cands, tab.vagas, d);
+    if (sit.kind === "ok" && !GM.majDec.has(k)) { GM.majDec.add(k); if (GM.majIni) gmEvento(`🏁 ${esc(nomeBonito(c0.nm))} é o novo governador de <b>${esc(UF_NAMES[uf])}</b>`, "var(--ok)", `🏁 ${nomeBonito(c0.nm)} eleito em ${UF_NAMES[uf]}!`, 800); }
+  }
+  GM.majIni = true;
+}
+
 function render() {
   const br = state.br; if (!br) return;
   const [A, B] = state.par; const nA = A?.n, nB = B?.n;
@@ -657,6 +793,7 @@ function render() {
       <td>${lid2}</td><td class="ap num"><div class="bar"><i style="width:${Math.min(100, g.pst)}%"></i></div>${pf(g.pst)}<span style="color:var(--ink2);font-size:.8rem"> · ${nf.format(g.st)}/${nf.format(g.ts)}</span></td>`;
   }).map(h => `<tr>${h}</tr>`).join("");
   setUpd(`TSE: totalização ${br.ht || "—"} · lido às ${state.lido.toLocaleTimeString("pt-BR")}`);
+  try { jogoPres(r, A, B); } catch (e) { console.error(e); }
 }
 
 let carregando = false;
@@ -671,12 +808,12 @@ async function carregar() {
     }
     if (!state.ele) {
       state.ele = escolherEleicao(await getJSON(BASE + "comum/config/ele-c.json", false, fetch.bind(window)), new Date());
-      if (!state.ele) { aviso("<b>O TSE ainda não publicou a eleição de 2026.</b>A página tenta de novo sozinha a cada 30 segundos."); setPill("", "Aguardando"); return; }
+      if (!state.ele) { aviso("<b>O TSE ainda não publicou a eleição de 2026.</b>A página tenta de novo sozinha a cada 10 segundos."); setPill("", "Aguardando"); return; }
     }
     let br;
     try { br = parseFile(await getTSE(dataUrl("br", state.ele), fetch.bind(window))); }
     catch (e) {
-      if ((e.status === 404 || e.status === 403) && !state.br) { aviso("<b>A eleição está configurada, mas o TSE ainda não divulgou números.</b>A página tenta de novo sozinha a cada 30 segundos."); setPill("", "Aguardando"); return; }
+      if ((e.status === 404 || e.status === 403) && !state.br) { aviso("<b>A eleição está configurada, mas o TSE ainda não divulgou números.</b>A página tenta de novo sozinha a cada 10 segundos."); setPill("", "Aguardando"); return; }
       throw e;
     }
     state.br = br; state.par = escolherPar(br);
@@ -687,7 +824,7 @@ async function carregar() {
     setPill("live", "Ao vivo"); render();
   } catch (err) {
     setPill("err", "Falha na leitura");
-    aviso(`<b>Não consegui ler o TSE (${esc(err.message)}).</b>Se você abriu este arquivo direto do celular ou de um aplicativo de arquivos, abra-o no navegador do computador (Chrome, Edge ou Firefox). A página continua tentando a cada 30 segundos.`, true);
+    aviso(`<b>Não consegui ler o TSE (${esc(err.message)}).</b>Se você abriu este arquivo direto do celular ou de um aplicativo de arquivos, abra-o no navegador do computador (Chrome, Edge ou Firefox). A página continua tentando a cada 10 segundos.`, true);
   } finally { carregando = false; $("refresh").disabled = false; }
 }
 
@@ -790,6 +927,7 @@ function renderMaj(tab) {
     return main + det;
   }).join("");
   renderSeats(tab);
+  try { jogoMaj(tab); } catch (e) { console.error(e); }
 }
 async function carregarMaj(tab) {
   if (busy[tab.id]) return; busy[tab.id] = true; $("refresh").disabled = true;
@@ -809,7 +947,7 @@ async function carregarMaj(tab) {
       }));
       res.forEach((r, i) => { if (r.status === "fulfilled") S.files[UFS[i]] = r.value; else { falhas++; if ([403, 404].includes(r.reason?.status)) naoDiv++; } });
       if (falhas === UFS.length && !Object.keys(S.files).length) {
-        if (naoDiv === UFS.length) { setPill("", "Aguardando", tab.id); aviso("<b>O TSE ainda não divulgou este cargo.</b>A página tenta de novo sozinha a cada 30 segundos.", false, tab.id); renderMaj(tab); return; }
+        if (naoDiv === UFS.length) { setPill("", "Aguardando", tab.id); aviso("<b>O TSE ainda não divulgou este cargo.</b>A página tenta de novo sozinha a cada 10 segundos.", false, tab.id); renderMaj(tab); return; }
         throw res[0].reason;
       }
     }
@@ -820,7 +958,7 @@ async function carregarMaj(tab) {
     renderMaj(tab);
   } catch (err) {
     setPill("err", "Falha na leitura", tab.id);
-    aviso(`<b>Não consegui ler o TSE (${esc(err.message)}).</b>Se abriu este arquivo direto do celular, use o navegador do computador. A página tenta de novo a cada 30 segundos.`, true, tab.id);
+    aviso(`<b>Não consegui ler o TSE (${esc(err.message)}).</b>Se abriu este arquivo direto do celular, use o navegador do computador. A página tenta de novo a cada 10 segundos.`, true, tab.id);
   } finally { busy[tab.id] = false; $("refresh").disabled = false; }
 }
 
@@ -928,9 +1066,9 @@ async function carregarProp(tab, forcar) {
     else {
       const cfg = await obterCfg(), cargo = cargoDe(tab, uf);
       const ele = eleicaoDe(cfg, uf, cargo, "1");
-      if (!ele) { setPill("", "Aguardando", tab.id); aviso(`<b>O TSE ainda não listou este cargo para ${esc(UF_NAMES[uf])}.</b>A página tenta de novo sozinha a cada 30 segundos.`, false, tab.id); return; }
+      if (!ele) { setPill("", "Aguardando", tab.id); aviso(`<b>O TSE ainda não listou este cargo para ${esc(UF_NAMES[uf])}.</b>A página tenta de novo sozinha a cada 10 segundos.`, false, tab.id); return; }
       try { d = parseCargo(await getTSE(cargoUrl(ele, uf, cargo), fetch.bind(window))); }
-      catch (e) { if ((e.status === 404 || e.status === 403) && !S.data) { setPill("", "Aguardando", tab.id); aviso("<b>O TSE ainda não divulgou este cargo.</b>A página tenta de novo sozinha a cada 30 segundos.", false, tab.id); return; } throw e; }
+      catch (e) { if ((e.status === 404 || e.status === 403) && !S.data) { setPill("", "Aguardando", tab.id); aviso("<b>O TSE ainda não divulgou este cargo.</b>A página tenta de novo sozinha a cada 10 segundos.", false, tab.id); return; } throw e; }
     }
     if (uf !== S.uf) return; // a pessoa trocou de estado durante a leitura
     S.data = d; aviso(null, false, tab.id); setPill("live", DEMO ? "Exemplo" : "Ao vivo", tab.id);
@@ -938,7 +1076,7 @@ async function carregarProp(tab, forcar) {
     renderProp(tab);
   } catch (err) {
     setPill("err", "Falha na leitura", tab.id);
-    aviso(`<b>Não consegui ler o TSE (${esc(err.message)}).</b>Se abriu este arquivo direto do celular, use o navegador do computador. A página tenta de novo a cada 30 segundos.`, true, tab.id);
+    aviso(`<b>Não consegui ler o TSE (${esc(err.message)}).</b>Se abriu este arquivo direto do celular, use o navegador do computador. A página tenta de novo a cada 10 segundos.`, true, tab.id);
   } finally { busy[tab.id] = false; $("refresh").disabled = false; }
 }
 
@@ -966,11 +1104,15 @@ function montarAbas() {
 }
 
 $("demoBanner").hidden = !DEMO;
+$("gmSnd").textContent = GM.som ? "🔊" : "🔇";
+$("gmSnd").onclick = () => { GM.som = !GM.som; try { localStorage.setItem("som", GM.som ? "1" : "0"); } catch (e) { /* ok */ } $("gmSnd").textContent = GM.som ? "🔊" : "🔇"; gmBip(700); };
 $("refresh").onclick = () => atualizar(true);
 montarFerramentas();
 montarAbas();
 irPara((location.hash || "").slice(1) || "presidente");
-setInterval(atualizar, REFRESH_S * 1000);
+let _tick = 0;
+setInterval(() => { if (state.tab === "presidente" || (++_tick % 2 === 0)) atualizar(); }, REFRESH_S * 1000);
 </script>
+<div class="gm-toast" id="gmToast" role="status" aria-live="polite"></div>
 </body>
 </html>
