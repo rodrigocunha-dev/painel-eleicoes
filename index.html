@@ -271,6 +271,18 @@ table.st{min-width:0}table.st td.sen{min-width:240px;white-space:normal}
 .vsw{display:inline-flex;gap:4px;padding:4px;border:1px solid var(--line);border-radius:999px;background:var(--panel);justify-self:center}
 .vsw button{border:0;border-radius:999px;padding:8px 16px;font-weight:700;background:transparent;color:var(--ink2);cursor:pointer}
 .vsw button[aria-pressed="true"]{background:var(--ink);color:var(--panel)}
+
+details.fx{margin-top:16px;border:1px solid var(--fx-bd);border-radius:12px;padding:0 12px}
+details.fx summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:8px;padding:12px 0;font-weight:700;flex-wrap:wrap}
+details.fx summary::-webkit-details-marker{display:none}
+details.fx summary::after{order:1;content:"▾";margin-left:auto;transition:transform .2s;color:var(--fx-mut)}
+details.fx[open] summary::after{transform:rotate(180deg)}
+details.fx .fxn{background:var(--fx-mut);color:var(--fx-bg);border-radius:99px;padding:1px 8px;font-size:.78rem}
+details.fx .fxu{order:2;font-weight:400;font-size:.85rem;color:var(--fx-mut);flex-basis:100%;margin-top:-4px}
+details.fx[open] .fxu{display:none}
+details.fx[open]{padding-bottom:12px}
+details.fx .gm-feed,details.fx .feed{max-height:360px;overflow-y:auto;margin-top:0}
+.gm{--fx-bd:var(--line);--fx-mut:var(--ink2);--fx-bg:var(--panel)}
 /* ===== modo jogo ===== */
 .gm h2{margin-top:16px}
 .gm-vs{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:end}
@@ -358,8 +370,8 @@ table.st{min-width:0}table.st td.sen{min-width:240px;white-space:normal}
     <div id="gmMap"></div>
     <div class="gm-leg" id="gmLeg"></div>
     <div class="gm-det" id="gmDet" hidden></div>
-    <h2>Viradas e conquistas</h2>
-    <div class="gm-feed" id="gmFeed"></div>
+    <details class="fx" id="gmFeedBox"><summary>🔄 Viradas e conquistas <span class="fxn" id="gmFeedN">0</span><span class="fxu" id="gmFeedU">Toque para ver</span></summary>
+    <div class="gm-feed" id="gmFeed"></div></details>
     <div class="sub" style="margin-top:10px">Fotos: divulgação oficial do TSE. Mapa: Victor Cazanave (svg-maps), licença CC BY 4.0, simplificado.</div>
     <div class="gm-pal" id="gmPal" hidden><span>🎯 <b>Palpite da galera:</b> aposte em quem leva o Brasil, cada estado e os governadores, e dispute o ranking.</span><a id="gmPalLink" href="#" target="_blank" rel="noopener">Fazer meu palpite →</a></div>
   </section>
@@ -857,6 +869,8 @@ function gmConfete() { if (matchMedia("(prefers-reduced-motion:reduce)").matches
 function gmEvento(txt, cor, aviso, fr) { GM.feed.unshift({ t: new Date(), txt, cor }); GM.feed = GM.feed.slice(0, 30); if (aviso) { gmToast(aviso); gmBip(fr); } renderFeed(); }
 function renderFeed() {
   const el = $("gmFeed"); if (!el) return;
+  $("gmFeedN").textContent = GM.feed.length;
+  $("gmFeedU").innerHTML = GM.feed.length ? `Última: ${GM.feed[0].txt} · ${GM.feed[0].t.toLocaleTimeString("pt-BR")}` : "Nenhuma ainda · toque para ver";
   el.innerHTML = GM.feed.length ? GM.feed.map(e => `<div class="gm-ev" style="border-left-color:${e.cor}"><time>${e.t.toLocaleTimeString("pt-BR")}</time><span>${e.txt}</span></div>`).join("")
     : '<div class="gm-ev"><span class="sub">As viradas e os estados garantidos aparecem aqui assim que acontecerem (a partir do momento em que você abriu a página).</span></div>';
 }
