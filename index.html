@@ -298,6 +298,7 @@ details.fx .gm-feed,details.fx .feed{max-height:360px;overflow-y:auto;margin-top
 .gm-rope .mk{position:absolute;top:-7px;width:12px;height:42px;margin-left:-6px;border-radius:6px;background:var(--panel);border:2px solid var(--ink);box-shadow:0 0 12px rgba(0,0,0,.35);transition:left .8s cubic-bezier(.2,.9,.3,1)}
 .gm-lead{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;align-items:center;font-weight:700;margin-top:12px;text-align:center}
 .gm-seal{padding:3px 12px;border-radius:99px;background:var(--ok);color:#fff;font-weight:800;font-size:.8rem;letter-spacing:.04em;animation:gmpop .6s}
+.gm-seal.t2{background:var(--warn);color:#fff}
 @keyframes gmpop{0%{transform:scale(.4)}70%{transform:scale(1.2)}100%{transform:scale(1)}}
 .gm-hud{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
 .gm-hud div{border:1px solid var(--line);border-radius:10px;padding:8px 10px;min-width:0}
@@ -840,7 +841,7 @@ function jogoPres(r, A, B) {
   GM.bat.set({ fotoA: foto(A), fotoB: foto(B), pctA: r.pa, pctB: r.pb, va: r.a, vb: r.b, numA: nA, numB: nB, nomeA: nomeCurto(A), nomeB: nomeCurto(B), win, apurado: br.pst || r.pst,
     rotApurado: `⏱ ${pf(br.pst || r.pst)} apurado · ${nf.format(br.st)} de ${nf.format(br.ts)} urnas<span class="sx"> (seções)</span>`, topA: ta ? "🔥 Top estados<br>" + esc(ta) : "", topB: tb ? "🔥 Top estados<br>" + esc(tb) : "" });
   const lead = !t ? "Aguardando os primeiros votos" : ladoBr < 0 ? "Empate" : `${esc(nomeCurto(ladoBr ? B : A))} ${win >= 0 ? "vence a batalha por" : "à frente por"} ${Math.abs(r.pa - r.pb).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} p.p. (${nf.format(Math.abs(r.a - r.b))} votos)`;
-  $("gmLead").innerHTML = `<span>${lead}</span>${win >= 0 ? `<span class="gm-seal">${fim ? "VENCEDOR" : "RESULTADO GARANTIDO"}</span>` : t2 ? `<span class="gm-seal">2º TURNO GARANTIDO</span>` : ""}`;
+  $("gmLead").innerHTML = `<span>${lead}</span>${win >= 0 ? `<span class="gm-seal">${fim ? "VENCEDOR" : "RESULTADO GARANTIDO"}</span>` : t2 ? `<span class="gm-seal t2">2º TURNO GARANTIDO</span>` : ""}`;
   // mapa + placar de estados + eventos
   let la = 0, lb = 0, ga = 0, gb = 0; const dados = {};
   for (const uf of [...UFS, "zz"]) {
