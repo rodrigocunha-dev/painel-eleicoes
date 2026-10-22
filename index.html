@@ -385,6 +385,9 @@ details.fx .gm-feed,details.fx .feed{max-height:360px;overflow-y:auto;margin-top
 .cl-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:14px}
 .cl-l,.cl-r{display:grid;gap:14px;align-content:start;min-width:0}
 .cl-c{min-width:0}
+.cl-bx{display:grid;grid-template-columns:minmax(0,1fr);gap:14px;margin-top:14px}
+@media (min-width:820px){.cl-bx{grid-template-columns:minmax(0,1.4fr) minmax(0,1fr)}}
+.cl-bx #clFeed{max-height:260px;overflow:auto}
 .cl-c #mapBlock>h2{display:none}
 .clc{border:1px solid var(--line);border-radius:12px;padding:12px 14px;min-width:0}
 .clc h3{margin:0 0 10px;font-family:var(--f-disp);font-size:1.05rem;font-weight:700}
@@ -628,10 +631,11 @@ details.fx .gm-feed,details.fx .feed{max-height:360px;overflow-y:auto;margin-top
     <div class="cl-ap"><div class="bar"><i id="brBar" style="width:0%"></i></div><div class="cl-apt"><b class="num" id="brPst">—</b> <span class="num" id="brSec"></span></div></div>
     </div>
     <div class="cl-grid">
-      <div class="cl-l"><div class="clc conta" id="clConta"></div><div class="clc" id="clOutros" hidden></div><div class="clc"><h3>Evolução da apuração</h3><div id="clChart"></div></div></div>
+      <div class="cl-l"><div class="clc conta" id="clConta"></div><div class="clc" id="clOutros" hidden></div></div>
       <div class="cl-c" id="clMapSlot"></div>
-      <div class="cl-r"><div class="clc"><h3>Resultado por região</h3><div id="clReg"></div></div><div class="clc"><h3>Acontecimentos da apuração</h3><div id="clFeed"></div></div></div>
+      <div class="cl-r"><div class="clc"><h3>Resultado por região</h3><div id="clReg"></div></div></div>
     </div>
+    <div class="cl-bx"><div class="clc"><h3>Evolução da apuração</h3><div id="clChart"></div></div><div class="clc"><h3>Acontecimentos da apuração</h3><div id="clFeed"></div></div></div>
     </div>
     <div class="gm-grid" id="gmGrid"><div class="gm-c1">
     <div id="gmBatBox"><div class="gm-hd"><h2 id="hGm">Batalha ao vivo</h2><div class="gm-lead" id="gmLead"></div></div>
@@ -1873,6 +1877,9 @@ function ajustarMapaClassico() {
 }
 let _ajB; const ajustarBatalhaLogo = () => { clearTimeout(_ajB); _ajB = setTimeout(ajustarBatalha, 60); };
 addEventListener("resize", ajustarBatalhaLogo);
+addEventListener("load", ajustarBatalhaLogo);
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(ajustarBatalhaLogo);
+setInterval(ajustarBatalha, 2500); // garantia: reajusta depois de cada atualização dos dados
 if (window.ResizeObserver) addEventListener("DOMContentLoaded", () => { const m = document.getElementById("gmMap"); const ro = new ResizeObserver(ajustarBatalhaLogo); ["gmMap","gmBat","gmHud","gmLead"].forEach(id => { const e = document.getElementById(id); if (e) ro.observe(e); }); });
 function modoVisual(m) {
   if (m !== "classico") m = "batalha";
