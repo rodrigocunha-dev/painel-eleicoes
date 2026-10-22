@@ -516,12 +516,8 @@ details.fx .gm-feed,details.fx .feed{max-height:360px;overflow-y:auto;margin-top
 .perde{filter:grayscale(1);opacity:.45;transition:filter .5s,opacity .5s}
 /* primeira tela sem rolar */
 @media (min-width:1180px){.gm .bt-face{width:170px}.gm .bt-arena{min-height:280px}.gm .bt-pc{font-size:54px}
-  /* a coluna da batalha estica até a altura do mapa */
-  .gm .gm-grid{align-items:stretch}
-  .gm .gm-c1,.gm #gmBatBox,.gm #gmArena,.gm #gmBat,.gm .bt{display:flex;flex-direction:column}
-  .gm .gm-c1>#gmBatBox,.gm #gmArena,.gm #gmBat,.gm .bt,.gm .bt-arena{flex:1 1 auto}
+  /* altura da batalha ajustada por ajustarBatalha() */
   .gm .bt-side{justify-content:center}
-  .gm .bt{max-height:max(400px,calc(100vh - 216px))}
   .gm .bt-crown{margin-top:-10px}}
 @media (max-width:600px){
   body{padding-block:10px 30px;padding-inline:10px}
@@ -1842,6 +1838,23 @@ function montarAbas() {
 
 
 /* troca entre batalha e visão clássica */
+/* batalha na altura do mapa, sem passar da primeira tela (só no computador) */
+function ajustarBatalha() {
+  const ar = document.querySelector(".gm .bt-arena"), bt = document.querySelector(".gm .bt"), mapa = $("gmMap"), hud = $("gmHud");
+  if (!ar || !bt || !mapa) return;
+  ar.style.minHeight = "";
+  if (innerWidth < 1180 || !mapa.offsetParent) return;
+  const base = ar.getBoundingClientRect().height, b = bt.getBoundingClientRect(), y0 = b.top + scrollY;
+  const hudH = hud && hud.offsetParent ? hud.getBoundingClientRect().height + 14 : 0;
+  const alvoMapa = mapa.getBoundingClientRect().bottom + scrollY - hudH;        // fim do mapa
+  const alvoTela = innerHeight - hudH - 10;                                        // fim da primeira tela
+  const fim = Math.min(alvoMapa, alvoTela);
+  const extra = fim - (y0 + b.height);
+  if (extra > 0) ar.style.minHeight = Math.round(base + extra) + "px";
+}
+let _ajB; const ajustarBatalhaLogo = () => { clearTimeout(_ajB); _ajB = setTimeout(ajustarBatalha, 60); };
+addEventListener("resize", ajustarBatalhaLogo);
+if (window.ResizeObserver) addEventListener("DOMContentLoaded", () => { const m = document.getElementById("gmMap"); const ro = new ResizeObserver(ajustarBatalhaLogo); ["gmMap","gmBat","gmHud","gmLead"].forEach(id => { const e = document.getElementById(id); if (e) ro.observe(e); }); });
 function modoVisual(m) {
   if (m !== "classico") m = "batalha";
   document.querySelectorAll(".vsw:not(.tsw) button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.modo === m)));
@@ -1851,6 +1864,7 @@ function modoVisual(m) {
   if (GM.mapa) requestAnimationFrame(() => GM.mapa.reencaixar());
   const tg = TABS.find(t => t.id === "governador"); if (tg && state.maj && state.maj.governador) try { renderGovCards(tg); } catch (e) { /* ainda sem dados */ }
   try { localStorage.setItem("modoVisual", m); } catch (e) { /* ok */ }
+  ajustarBatalhaLogo();
 }
 document.querySelectorAll(".vsw:not(.tsw) button").forEach(b => b.onclick = () => modoVisual(b.dataset.modo));
 modoVisual((() => { try { return localStorage.getItem("modoVisual"); } catch (e) { return null; } })());
