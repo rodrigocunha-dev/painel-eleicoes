@@ -306,7 +306,10 @@ details.fx[open]{padding-bottom:12px}
 details.fx .gm-feed,details.fx .feed{max-height:360px;overflow-y:auto;margin-top:0}
 .gm{--fx-bd:var(--line);--fx-mut:var(--ink2);--fx-bg:var(--panel)}
 .nav2{display:flex;flex-wrap:wrap;gap:10px;align-items:center;min-width:0}
-.nav2 .tabs{flex:1;min-width:0}
+.nav2 .tabs{flex:0 1 auto;min-width:0}
+.nav2 #modoSw{justify-self:auto;flex:none;margin-left:auto}
+.nav2.centro #modoSw{margin-right:auto}
+@media (max-width:600px){.nav2 #modoSw{order:1}.nav2 .tabs{order:2}.nav2 .vsw button{padding:7px 11px;font-size:14px}.nav2 .ic{display:none}.nav2{gap:8px}}
 .vsw.tsw{justify-self:auto;flex:none}
 @media (max-width:600px){.nav2 .tabs{flex-basis:100%}}
 .gm-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
@@ -568,13 +571,13 @@ details.fx .gm-feed,details.fx .feed{max-height:360px;overflow-y:auto;margin-top
       <button type="button" data-t="2" aria-pressed="false">2º turno</button>
     </div>
     <nav class="tabs" id="tabs" aria-label="Cargo"></nav>
+    <div class="vsw" id="modoSw" role="group" aria-label="Forma de visualizar">
+    <button type="button" data-modo="batalha" aria-pressed="true"><span class="ic">🎮 </span>Batalha</button>
+    <button type="button" data-modo="classico" aria-pressed="false"><span class="ic">📊 </span>Clássico</button>
+  </div>
   </div>
   <div id="notice" hidden></div>
 
-  <div class="vsw" id="modoSw" role="group" aria-label="Forma de visualizar">
-    <button type="button" data-modo="batalha" aria-pressed="true">🎮 Batalha</button>
-    <button type="button" data-modo="classico" aria-pressed="false">📊 Clássico</button>
-  </div>
   <div class="view" id="v-presidente">
   <section class="panel gm" aria-labelledby="hGm">
     <div id="clLayout" hidden>
