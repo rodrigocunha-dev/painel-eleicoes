@@ -10,12 +10,12 @@
 <style>
 /* Layout: placar nacional em duas colunas, faixa de regiões e tabela por UF; tudo gira em torno dos dois candidatos da disputa e do % de seções apuradas */
 :root{
-  --bg:#eef1f4; --panel:#ffffff; --ink:#121b24; --ink2:#52606d; --line:#d9e0e7;
-  --a:#c4302b; --a-soft:#f6dcda; --b:#1c5db5; --b-soft:#d9e5f6;
-  --ok:#1d8a5b; --warn:#b7791f; --err:#b42318; --track:#e3e8ed; --c1:#0f766e; --c2:#b45309; --c3:#6d28d9;
+  --bg:#0d1319; --panel:#151d26; --ink:#e8edf2; --ink2:#9aa8b6; --line:#25303b;
+  --a:#ee6a63; --a-soft:#3a1f1e; --b:#6aa4f2; --b-soft:#1b2c44;
+  --ok:#4cc38a; --warn:#e0a94a; --err:#f2766b; --track:#232d38; --c1:#4fd1c5; --c2:#f0a85a; --c3:#a78bfa;
   --f-disp:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
   --f-body:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;
-  color-scheme:light;
+  color-scheme:dark;
 }
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
@@ -262,6 +262,18 @@ table.st{min-width:0}table.st td.sen{min-width:240px;white-space:normal}
 .bm text{font:800 13px system-ui,sans-serif;fill:#fff;text-anchor:middle;pointer-events:none;paint-order:stroke;stroke:rgba(0,0,0,.35);stroke-width:2.5}
 .bm text.vz{fill:var(--jg-mut);stroke:none}
 .bm text.p{font-size:9.5px}
+.bm-chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:8px}
+.bm-chips .chip{border:0;border-radius:99px;padding:4px 10px;font:800 12px system-ui,sans-serif;color:#fff;cursor:pointer;background:var(--jg-ground)}
+.bm-chips .chip.vz{color:var(--jg-mut)}
+.bm-chips .chip.sel{outline:2px solid var(--jg-ink);outline-offset:1px}
+.bm-chips .chip.fl{animation:bmfl 1.3s}
+
+.bm .cl{stroke:var(--jg-mut);stroke-width:1;opacity:.7}
+.bm .bx{cursor:pointer}
+.bm .bx text{font-size:12px}
+.bm .bx.sel rect{stroke:var(--jg-ink);stroke-width:2}
+.bm text .pc{font-size:11px;font-weight:700}
+
 .bm .ext circle{stroke:var(--jg-bg);stroke-width:1.5;cursor:pointer}
 @media (prefers-reduced-motion:reduce){.tgw.shake,.bm path.fl,.tg .txt.on{animation:none}.tg .txt.on{opacity:1}}
 
@@ -313,6 +325,103 @@ details.fx .gm-feed,details.fx .feed{max-height:360px;overflow-y:auto;margin-top
 .gv-bar i{display:block;height:100%;transition:width .6s}
 .gv-s{font-size:.8rem;color:var(--ink2);margin-top:6px;text-align:center}
 .gv .gm-seal{animation:none}
+/* modo clássico: barra no estilo placar, cada lado com o % dos votos válidos */
+#secBrasil .cl{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:end;margin-top:12px}
+.cl-f{width:64px;height:72px;border-radius:10px;object-fit:cover;object-position:50% 20%;background:var(--track)}
+.cl-f.a{box-shadow:0 0 0 3px var(--a)}.cl-f.b{box-shadow:0 0 0 3px var(--b)}
+.cl-mid{min-width:0}
+.cl-top{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:10px;align-items:baseline}
+.cl-n{font-family:var(--f-disp);font-weight:700;font-size:1.25rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cl-n small{font:600 .78rem var(--f-body);color:var(--ink2)}
+.cl-n.a span{color:var(--ink)}.cl-n.a small{color:var(--a)}.cl-n.b{text-align:right}.cl-n.b small{color:var(--b)}
+.cl-head{font-family:var(--f-disp);font-weight:700;font-size:1.15rem;text-align:center}
+.cl-head .a{color:var(--a)}.cl-head .b{color:var(--b)}
+.cl-bar{position:relative;height:44px;border-radius:8px;background:var(--track);overflow:hidden;margin-top:6px}
+.cl-fa,.cl-fb{position:absolute;top:0;bottom:0;display:flex;align-items:center;gap:10px;color:#fff;white-space:nowrap;overflow:hidden;transition:width .6s}
+.cl-fa{left:0;background:var(--a);padding-left:12px}.cl-fb{right:0;background:var(--b);justify-content:flex-end;padding-right:12px}
+.cl-fa b,.cl-fb b{font-family:var(--f-disp);font-size:1.6rem;font-weight:800}
+.cl-fa span,.cl-fb span{font-size:.8rem;opacity:.9}
+.cl-50{position:absolute;left:50%;top:0;bottom:0;border-left:2px solid var(--panel);z-index:1}
+.cl-50 i{position:absolute;top:50%;left:0;transform:translate(-50%,-50%);font:700 .7rem var(--f-body);font-style:normal;background:var(--ink);color:var(--panel);padding:2px 6px;border-radius:6px}
+@media (max-width:640px){
+  #secBrasil .cl{gap:8px}.cl-f{width:44px;height:52px}
+  .cl-top{grid-template-columns:1fr 1fr}.cl-head{grid-column:1 / -1;grid-row:2;font-size:1rem}
+  .cl-fa span,.cl-fb span{display:none}.cl-fa b,.cl-fb b{font-size:1.2rem}
+}
+/* batalha maior no computador */
+@media (min-width:1180px){
+  .wrap{max-width:1440px}
+  .gm-grid{grid-template-columns:minmax(0,1.35fr) minmax(0,1fr)}
+  .gm .bt-face{width:180px}
+  .gm .bt-pc{font-size:56px}
+  .gm .bt-nm{font-size:24px}
+  .gm .bt-arena{min-height:330px}
+  .gm .bt-top{font-size:13px}
+  .gm .bt-bar{height:42px}
+  .gm .bt-fa b,.gm .bt-fb b{font-size:22px}
+}
+/* layout clássico (uma tela no computador) */
+.bm{max-width:640px}
+#secBrasil{margin-bottom:14px}
+.cl-ap{margin-top:8px}
+.cl-ap .bar{height:6px;margin:0;background:var(--track)}
+.cl-ap .bar i{background:var(--ok)}
+.cl-apt{text-align:right;font-size:.85rem;color:var(--ink2);margin-top:4px}
+.cl-apt b{color:var(--ok)}
+.cl-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:14px}
+.cl-l,.cl-r{display:grid;gap:14px;align-content:start;min-width:0}
+.cl-c{min-width:0}
+.cl-c #mapBlock>h2{display:none}
+.clc{border:1px solid var(--line);border-radius:12px;padding:12px 14px;min-width:0}
+.clc h3{margin:0 0 10px;font-family:var(--f-disp);font-size:1.05rem;font-weight:700}
+.kv{display:flex;justify-content:space-between;gap:10px;font-size:.9rem;padding:4px 0}
+.kv span{color:var(--ink2)}.kv b{text-align:right}
+.oc{display:grid;grid-template-columns:30px minmax(0,1fr) auto;gap:8px;align-items:center;padding:6px 0;border-top:1px solid var(--line);font-size:.88rem}
+.oc img,.oc .ph{width:30px;height:30px;border-radius:50%;object-fit:cover;object-position:50% 20%;background:var(--track)}
+.oc small{display:block;color:var(--ink2);font-size:.75rem}
+.rg{display:grid;grid-template-columns:minmax(0,1fr) 26px auto;gap:8px;align-items:center;padding:7px 0;border-top:1px solid var(--line)}
+.rg:first-child{border-top:0}
+.rg .nm{font-weight:600}.rg small{display:block;color:var(--ink2);font-size:.75rem}
+.rg img,.rg .ph{width:26px;height:26px;border-radius:50%;object-fit:cover;object-position:50% 20%;background:var(--track)}
+.rg .vl{text-align:right;min-width:86px}
+.rg .vl b{font-family:var(--f-disp);font-size:1.15rem}
+.rg .mb{position:relative;height:5px;border-radius:9px;background:var(--track);margin-top:3px;overflow:hidden}
+.rg .mb i{position:absolute;left:0;top:0;bottom:0}
+.rg .mb u{position:absolute;left:50%;top:-2px;bottom:-2px;border-left:2px solid var(--ink)}
+.cf-ev{display:grid;grid-template-columns:44px minmax(0,1fr);gap:8px;padding:6px 0;border-top:1px solid var(--line);font-size:.86rem}
+.cf-ev:first-child{border-top:0}.cf-ev time{color:var(--ink2);font-size:.78rem}
+.ch svg{display:block;width:100%;height:auto}
+.ch .lg{display:flex;gap:12px;font-size:.8rem;color:var(--ink2);margin-bottom:6px}
+.ch .lg i{display:inline-block;width:14px;height:3px;border-radius:2px;margin-right:4px;vertical-align:middle}
+@media (max-width:819px){.cl-c{order:-1}}
+@media (min-width:1180px){
+  .cl-grid{grid-template-columns:290px minmax(0,1fr) 300px;align-items:start}
+}
+@media (min-width:820px) and (max-width:1179px){
+  .cl-grid{grid-template-columns:minmax(0,1fr) 300px}
+  .cl-l{grid-column:1 / -1;grid-row:2;grid-template-columns:1fr 1fr}
+}
+.bm{max-width:600px}
+.clc.conta{border-color:color-mix(in srgb,var(--ok) 45%,var(--line));box-shadow:0 0 24px color-mix(in srgb,var(--ok) 12%,transparent)}
+.ct-big{font-family:var(--f-disp);font-weight:800;font-size:1.5rem;line-height:1.15;margin:2px 0 8px}
+.ct-big .a{color:var(--a)}.ct-big .b{color:var(--b)}
+.ct-g{position:relative;height:16px;border-radius:99px;background:var(--track);margin:26px 0 4px;overflow:visible}
+.ct-g i{position:absolute;left:0;top:0;bottom:0;border-radius:99px}
+.ct-g u{position:absolute;top:-5px;bottom:-5px;border-left:3px solid var(--ink);text-decoration:none}
+.ct-g u span{position:absolute;top:-18px;left:0;transform:translateX(-50%);font-size:.7rem;white-space:nowrap;color:var(--ink)}
+.ct-l{display:flex;justify-content:space-between;font-size:.75rem;color:var(--ink2)}
+.ct-ok{display:inline-block;background:var(--ok);color:#06140d;font-weight:800;padding:2px 10px;border-radius:99px;font-size:.8rem;margin-bottom:6px}
+.rg2{padding:7px 0;border-top:1px solid var(--line)}
+.rg2:first-child{border-top:0}
+.rg2 .h{display:flex;justify-content:space-between;font-size:.86rem}
+.rg2 .h small{color:var(--ink2)}
+.rg2 .tw2{position:relative;display:flex;justify-content:space-between;align-items:center;height:22px;border-radius:6px;background:var(--track);margin-top:4px;overflow:hidden}
+.rg2 .tw2 i{position:absolute;top:0;bottom:0}
+.rg2 .tw2 b{position:relative;z-index:1;font-family:var(--f-disp);font-size:.95rem;padding:0 7px;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.6)}
+.rg2 .tw2 u{position:absolute;left:50%;top:0;bottom:0;border-left:2px solid var(--bg);z-index:2}
+.rg2 .tw2.la{box-shadow:0 0 12px color-mix(in srgb,var(--a) 50%,transparent)}.rg2 .tw2.lb{box-shadow:0 0 12px color-mix(in srgb,var(--b) 50%,transparent)}
+.cl-fa.lid{box-shadow:0 0 22px var(--a)}.cl-fb.lid{box-shadow:0 0 22px var(--b)}
+.cl-n .cr{font-size:1rem;margin:0 4px}
 /* ===== modo jogo ===== */
 .gm h2{margin-top:16px}
 .gm-vs{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:end}
@@ -385,30 +494,36 @@ details.fx .gm-feed,details.fx .feed{max-height:360px;overflow-y:auto;margin-top
     <button type="button" data-modo="classico" aria-pressed="false">📊 Clássico</button>
   </div>
   <section class="panel gm" aria-labelledby="hGm">
-    <div class="gm-grid"><div class="gm-c1">
+    <div id="clLayout" hidden>
+    <div id="secBrasil">
+    <div class="cl">
+      <img class="cl-f a" id="aImg" alt="" hidden referrerpolicy="no-referrer">
+      <div class="cl-mid">
+        <div class="cl-top"><div class="cl-n a"><span id="aNm">—</span> <small id="aSg"></small></div><div class="cl-head" id="brLead"></div><div class="cl-n b"><small id="bSg"></small> <span id="bNm">—</span></div></div>
+        <div class="cl-bar" id="brSplit"><div class="cl-fa" style="width:0%"><b class="num" id="aPct">—</b><span class="num" id="aVotes"></span></div><div class="cl-fb" style="width:0%"><span class="num" id="bVotes"></span><b class="num" id="bPct">—</b></div><span class="cl-50"><i>50%</i></span></div>
+      </div>
+      <img class="cl-f b" id="bImg" alt="" hidden referrerpolicy="no-referrer">
+    </div>
+    <div id="brStatus" class="brstatus"></div>
+    <div class="cl-ap"><div class="bar"><i id="brBar" style="width:0%"></i></div><div class="cl-apt"><b class="num" id="brPst">—</b> <span class="num" id="brSec"></span></div></div>
+    </div>
+    <div class="cl-grid">
+      <div class="cl-l"><div class="clc conta" id="clConta"></div><div class="clc" id="clOutros" hidden></div><div class="clc"><h3>📈 Como a noite andou</h3><div id="clChart"></div></div></div>
+      <div class="cl-c" id="clMapSlot"></div>
+      <div class="cl-r"><div class="clc"><h3>⚔️ Placar das regiões</h3><div id="clReg"></div></div><div class="clc"><h3>🔄 Linha do tempo</h3><div id="clFeed"></div></div></div>
+    </div>
+    </div>
+    <div class="gm-grid" id="gmGrid"><div class="gm-c1">
     <div id="gmBatBox"><h2 id="hGm">Batalha ao vivo</h2>
     <div id="gmArena" style="margin-top:12px"><div id="gmBat"></div><div class="gm-lead" id="gmLead"></div></div></div>
-    <div id="secBrasil" hidden>
-    <h2 id="hBr">Brasil</h2>
-    <div class="score" style="margin-top:12px">
-      <div class="cand a"><div class="who"><span id="aNm">—</span><small id="aSg"></small></div><div class="pct num" id="aPct">—</div><div class="votes num" id="aVotes"></div></div>
-      <div class="cand b"><div class="who"><span id="bNm">—</span><small id="bSg"></small></div><div class="pct num" id="bPct">—</div><div class="votes num" id="bVotes"></div></div>
-    </div>
-    <div class="split" id="brSplit"><i class="sa" style="width:50%"></i><i class="sb" style="width:50%"></i></div>
-    <div class="lead num" id="brLead"></div>
-    <div id="brStatus" class="brstatus"></div>
-    <div class="prog">
-      <div class="row"><span class="big num" id="brPst">—</span><span class="num" id="brSec" style="color:var(--ink2)"></span></div>
-      <div class="bar"><i id="brBar" style="width:0%"></i></div>
-      <div class="foot" style="margin-top:6px">Percentuais sobre votos válidos. “Apurado” é a parcela das urnas (seções) já totalizadas pelo TSE.</div>
-    </div>
-    </div>
     <div class="gm-hud" id="gmHud"></div>
-    </div><div class="gm-c2">
+    </div><div class="gm-c2" id="gmMapSlot">
+    <div id="mapBlock">
     <h2>Mapa de territórios</h2>
     <div id="gmMap"></div>
     <div class="gm-leg" id="gmLeg"></div>
     <div class="gm-det" id="gmDet" hidden></div>
+    </div>
     </div></div>
     <details class="fx" id="gmFeedBox"><summary>🔄 Viradas e conquistas <span class="fxn" id="gmFeedN">0</span><span class="fxu" id="gmFeedU">Toque para ver</span></summary>
     <div class="gm-feed" id="gmFeed"></div></details>
@@ -416,7 +531,7 @@ details.fx .gm-feed,details.fx .feed{max-height:360px;overflow-y:auto;margin-top
     <div class="gm-pal" id="gmPal" hidden><span>🎯 <b>Palpite da galera:</b> aposte em quem leva o Brasil, cada estado e os governadores, e dispute o ranking.</span><a id="gmPalLink" href="#" target="_blank" rel="noopener">Fazer meu palpite →</a></div>
   </section>
 
-  <section class="panel" aria-labelledby="hReg">
+  <section class="panel" id="secReg" aria-labelledby="hReg">
     <h2 id="hReg">Regiões</h2>
     <div class="regs" id="regs" style="margin-top:12px"></div>
   </section>
@@ -510,7 +625,7 @@ function parseFile(d) {
     cands.push({ n: c.n, nm: c.nmu || c.nm || "", sg: p.sg || "", vap: num(c.vap), st: String(c.st || "").trim(), sq: String(c.sqcand || "") });
   const s = d.s || {}, v = d.v || {};
   const pstRaw = s.pstn != null && s.pstn !== "" ? s.pstn : s.pst;
-  return { cands, vv: num(v.vv), st: num(s.st), ts: num(s.ts), pst: dec(pstRaw), ht: d.ht || d.hg || "", dt: d.dt || d.dg || "", tf: d.tf, esnt: restantes(d) };
+  return { cands, vv: num(v.vv), st: num(s.st), ts: num(s.ts), pst: dec(pstRaw), ht: d.ht || d.hg || "", dt: d.dt || d.dg || "", tf: d.tf, esnt: restantes(d), te: num(((d && d.e) || {}).te) };
 }
 // Teto de votos que ainda podem entrar = eleitores das seções ainda não totalizadas (campo e.esnt do TSE).
 // Se o campo não vier, vale Infinity: nada é dado como garantido sem esse número.
@@ -832,32 +947,36 @@ function criarBatalha(el) {
 }
 
 function criarMapa(el, aoClicar) {
-  const PEQ = new Set(["df", "se", "al", "pb", "rn", "es", "rj", "pe"]);
+  // estados pequenos (sem espaço para o rótulo) aparecem numa faixa de chips abaixo do mapa
+  const PEQ = ["rn", "pb", "pe", "al", "se", "es", "rj", "df"];
   el.innerHTML = `<svg class="bm" viewBox="0 0 613 660" role="img" aria-label="Mapa do Brasil por estado">
     ${Object.entries(BR_PATHS).map(([u, d]) => `<path data-uf="${u}" d="${d}"><title></title></path>`).join("")}
-    <g class="ext" data-uf="zz"><circle cx="560" cy="620" r="24" data-uf="zz"><title></title></circle></g><g class="lb"></g></svg>`;
-  const svg = el.querySelector("svg"), lb = el.querySelector(".lb");
+    <g class="ext" data-uf="zz"><circle cx="560" cy="620" r="24" data-uf="zz"><title></title></circle></g><g class="lb"></g></svg>
+    <div class="bm-chips" role="group" aria-label="Estados pequenos"></div>`;
+  const svg = el.querySelector("svg"), lb = el.querySelector(".lb"), chips = el.querySelector(".bm-chips");
   const centros = {};
-  const AJ = { rn: [6, -2], pb: [10, 1], pe: [0, 2], al: [6, 2], se: [5, 4], es: [8, 2], rj: [4, 4], df: [0, 1], sc: [2, 1], go: [-6, 8] };
-  svg.querySelectorAll("path").forEach(p => { const b = p.getBBox(), aj = AJ[p.dataset.uf] || [0, 0]; centros[p.dataset.uf] = [b.x + b.width / 2 + aj[0], b.y + b.height / 2 + 5 + aj[1]]; });
-  centros.zz = [560, 625];
-  svg.addEventListener("click", e => { const u = e.target.closest("[data-uf]")?.dataset.uf; if (u && aoClicar) aoClicar(u); });
+  const AJ = { sc: [2, 1], go: [-6, 8], pa: [0, 10], am: [0, 6], mg: [-4, 6], ba: [-6, 4], to: [0, 6], ma: [-6, 6], pi: [2, 6], ce: [0, 2], ms: [0, 4], sp: [6, 2] };
+  svg.querySelectorAll("path").forEach(p => { const b = p.getBBox(), aj = AJ[p.dataset.uf] || [0, 0]; centros[p.dataset.uf] = [b.x + b.width / 2 + aj[0], b.y + b.height / 2 + aj[1]]; });
+  centros.zz = [560, 620];
+  el.addEventListener("click", e => { const u = e.target.closest("[data-uf]")?.dataset.uf; if (u && aoClicar) aoClicar(u); });
+  const cor = (x, f) => x && x.cor ? `color-mix(in srgb, ${x.cor} ${Math.round((f ?? x.forca ?? 1) * 100)}%, var(--jg-ground))` : "";
   return {
-    // dados: { uf: { cor:"var(--a)", forca:0..1, rotulo:"52%", gar:bool, titulo:"..." } }
+    // dados: { uf: { cor:"var(--a)", forca:0..1, pct:"52%", gar:bool, titulo:"..." } }
     set(dados, sel) {
       svg.querySelectorAll("path, .ext circle").forEach(p => {
         const x = dados[p.dataset.uf];
-        p.style.fill = x && x.cor ? `color-mix(in srgb, ${x.cor} ${Math.round((x.forca ?? 1) * 100)}%, var(--jg-ground))` : "";
+        p.style.fill = cor(x);
         p.classList.toggle("sel", sel === p.dataset.uf);
         p.querySelector("title").textContent = x?.titulo || "";
       });
-      lb.innerHTML = Object.entries(centros).map(([u, [x, y]]) => {
-        const d = dados[u] || {}, peq = PEQ.has(u);
-        const txt = (u === "zz" ? "EXT" : u.toUpperCase()) + (d.gar ? "✓" : "");
-        return `<text x="${x}" y="${y}" class="${d.cor ? "" : "vz"} ${peq ? "p" : ""}">${txt}</text>`;
+      lb.innerHTML = Object.entries(centros).filter(([u]) => !PEQ.includes(u)).map(([u, [x, y]]) => {
+        const d = dados[u] || {}, sig = (u === "zz" ? "EXT" : u.toUpperCase()) + (d.gar ? "✓" : "");
+        return `<text x="${x}" y="${y}" class="${d.cor ? "" : "vz"}">${d.pct ? `<tspan x="${x}" dy="-2">${sig}</tspan><tspan x="${x}" dy="13" class="pc">${d.pct}</tspan>` : `<tspan x="${x}" dy="4">${sig}</tspan>`}</text>`;
       }).join("");
+      chips.innerHTML = PEQ.map(u => { const d = dados[u] || {};
+        return `<button type="button" class="chip${sel === u ? " sel" : ""}${d.cor ? "" : " vz"}" data-uf="${u}" style="${d.cor ? `background:${cor(d, 1)}` : ""}" title="${(d.titulo || "").replace(/"/g, "&quot;")}">${u.toUpperCase()}${d.pct ? " " + d.pct : ""}${d.gar ? " ✓" : ""}</button>`; }).join("");
     },
-    piscar(u) { const p = svg.querySelector(`[data-uf="${u}"]`); if (!p) return; p.classList.remove("fl"); void p.getBBox(); p.classList.add("fl"); },
+    piscar(u) { const p = el.querySelector(`path[data-uf="${u}"]`) || el.querySelector(`[data-uf="${u}"]`); if (!p) return; p.classList.remove("fl"); void p.offsetWidth; p.classList.add("fl"); },
   };
 }
 
@@ -869,9 +988,85 @@ function gmToast(txt) { const t = $("gmToast"); t.textContent = txt; t.classList
 function gmBip(fr = 660, d = .15) { if (!GM.som) return; try { const c = gmBip.c || (gmBip.c = new (window.AudioContext || window.webkitAudioContext)()), o = c.createOscillator(), g = c.createGain(); o.frequency.value = fr; g.gain.value = .08; o.connect(g); g.connect(c.destination); o.start(); o.stop(c.currentTime + d); } catch (e) { /* ok */ } }
 function gmConfete() { if (matchMedia("(prefers-reduced-motion:reduce)").matches) return; const cs = getComputedStyle(document.documentElement); const cores = [cs.getPropertyValue("--a"), cs.getPropertyValue("--b"), cs.getPropertyValue("--ok"), "#ffc83d"]; for (let i = 0; i < 70; i++) { const e = document.createElement("span"); e.className = "gm-cf"; e.style.left = Math.random() * 100 + "vw"; e.style.background = cores[i % 4]; e.style.animationDelay = Math.random() * .8 + "s"; document.body.appendChild(e); setTimeout(() => e.remove(), 4500); } }
 function gmEvento(txt, cor, aviso, fr) { GM.feed.unshift({ t: new Date(), txt, cor }); GM.feed = GM.feed.slice(0, 30); if (aviso) { gmToast(aviso); gmBip(fr); } renderFeed(); }
+/* ----- modo clássico: cartões laterais e gráfico ----- */
+function fotoBr(c) { return c && c.sq && state.ele ? `${BASE}${state.ele.ciclo}/${state.ele.cd}/fotos/br/${c.sq}.jpeg` : ""; }
+const fotoTag = (c, cls = "") => { const u = fotoBr(c); return u ? `<img class="${cls}" src="${u}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'ph'}))">` : `<span class="ph"></span>`; };
+const pp2 = v => v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+function histKey() { return state.ele ? "hist-" + state.ele.cd : ""; }
+function histCarregar() { GM.histK = histKey(); try { GM.hist = JSON.parse(localStorage.getItem(GM.histK) || "[]"); } catch (e) { GM.hist = []; } }
+function histAnotar(r) {
+  if (GM.histK !== histKey()) histCarregar();
+  const br = state.br, p = br.pst || r.pst; if (!(r.a + r.b > 0) || !(p > 0)) return;
+  const ult = GM.hist[GM.hist.length - 1];
+  if (ult && Math.abs(ult[0] - p) < 0.01) return;
+  GM.hist.push([+p.toFixed(2), +r.pa.toFixed(2), +r.pb.toFixed(2)]);
+  if (GM.hist.length > 600) GM.hist = GM.hist.filter((_, i) => i % 2 === 0);
+  try { localStorage.setItem(GM.histK, JSON.stringify(GM.hist)); } catch (e) { /* ok */ }
+}
+function grafico(A, B) {
+  const H = GM.hist || [], W = 300, Hh = 170, L = 30, R = 8, T = 8, Bm = 22;
+  const lg = `<div class="lg"><span><i style="background:var(--a)"></i>${esc(nomeCurto(A))}</span><span><i style="background:var(--b)"></i>${esc(nomeCurto(B))}</span></div>`;
+  if (H.length < 2) return lg + `<div class="sub">${state.br && state.br.tf === "s" && !H.length ? "A apuração deste turno já terminou. O gráfico é montado durante a apuração ao vivo, a partir do momento em que a página é aberta." : "O gráfico aparece conforme as urnas forem sendo apuradas (a partir do momento em que você abriu a página)."}</div>`;
+  const vals = H.flatMap(h => [h[1], h[2]]); let lo = Math.floor(Math.min(...vals) - 1), hi = Math.ceil(Math.max(...vals) + 1); if (hi - lo < 4) { lo -= 2; hi += 2; }
+  const X = p => L + (W - L - R) * p / 100, Y = v => T + (Hh - T - Bm) * (hi - v) / (hi - lo);
+  const linha = k => H.map((h, i) => `${i ? "L" : "M"}${X(h[0]).toFixed(1)},${Y(h[k]).toFixed(1)}`).join("");
+  const passo = Math.max(1, Math.round((hi - lo) / 4)); let grade = "";
+  for (let v = Math.ceil(lo); v <= hi; v += passo) grade += `<line x1="${L}" x2="${W - R}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--line)"/><text x="${L - 4}" y="${Y(v) + 3}" font-size="9" text-anchor="end" fill="var(--ink2)">${v}%</text>`;
+  const ex = [0, 50, 100].map(p => `<text x="${X(p)}" y="${Hh - 6}" font-size="9" text-anchor="${p ? (p === 100 ? "end" : "middle") : "start"}" fill="var(--ink2)">${p}%${p ? "" : " das seções"}</text>`).join("");
+  const u = H[H.length - 1];
+  return lg + `<svg viewBox="0 0 ${W} ${Hh}" role="img" aria-label="Percentual de cada candidato ao longo da apuração">${grade}${ex}
+    <path d="${linha(1)}" fill="none" stroke="var(--a)" stroke-width="2.2"/><path d="${linha(2)}" fill="none" stroke="var(--b)" stroke-width="2.2"/>
+    <circle cx="${X(u[0])}" cy="${Y(u[1])}" r="3.5" fill="var(--a)"/><circle cx="${X(u[0])}" cy="${Y(u[2])}" r="3.5" fill="var(--b)"/></svg>`;
+}
+function classicoExtras(r, A, B, sm) {
+  if (!A || !B) return;
+  const br = state.br, t = r.a + r.b, d = Math.abs(r.a - r.b), fim = br.tf === "s" || br.esnt === 0;
+  histAnotar(r);
+  // ---- A conta da virada: quanto quem está atrás precisa dos votos que faltam
+  const lider = r.a >= r.b ? A : B, atras = lider === A ? B : A, la = lider === A ? "a" : "b", lt = la === "a" ? "b" : "a";
+  const apurEleit = (br.te || 0) - (isFinite(br.esnt) ? br.esnt : 0);
+  const taxa = apurEleit > 0 ? Math.min(1, br.vv / apurEleit) : 0.75;                       // votos válidos por eleitor nas urnas já apuradas
+  const resta = isFinite(br.esnt) ? Math.round(br.esnt * taxa) : 0;            // estimativa de votos válidos que faltam
+  let conta;
+  if (!t) conta = `<div class="ct-big">Aguardando os primeiros votos</div><div class="sub">Assim que as urnas começarem a ser apuradas, esta conta mostra o que cada lado precisa para virar.</div>`;
+  else if (fim) conta = `<span class="ct-ok">APURAÇÃO CONCLUÍDA</span><div class="ct-big"><span class="${la}">${esc(nomeCurto(lider))}</span> terminou ${fmtCurto(d)} de votos à frente</div><div class="sub">${pp2(Math.abs(r.pa - r.pb))} pontos de diferença nos votos válidos.</div>`;
+  else if (state.turno === "2") {
+    const precisa = resta > 0 ? (resta + d) / (2 * resta) * 100 : 999;      // % dos votos restantes que quem está atrás precisa
+    const hoje = (atras === A ? r.a : r.b) / t * 100;
+    if (precisa > 100) conta = `<span class="ct-ok">VIRADA IMPOSSÍVEL</span><div class="ct-big"><span class="${la}">${esc(nomeCurto(lider))}</span> já tem a vitória garantida</div><div class="sub">Faltam cerca de ${fmtCurto(resta)} de votos válidos, menos que a vantagem de ${fmtCurto(d)}.</div>`;
+    else conta = `<div class="ct-big">Para virar, <span class="${lt}">${esc(nomeCurto(atras))}</span> precisa de <span class="${lt}">${pp2(precisa)}%</span> dos votos que faltam</div>
+      <div class="ct-g"><i style="width:${Math.min(100, hoje)}%;background:var(--${lt})"></i><u style="left:${Math.min(100, precisa)}%"><span>precisa ${pp2(precisa)}%</span></u></div>
+      <div class="ct-l"><span>hoje tem ${pp2(hoje)}%</span><span>faltam ~${fmtCurto(resta)} de votos</span></div>`;
+  } else {
+    const o = ordenarCands(br), top = o[0], tv = br.vv || t;
+    const precisa = resta > 0 ? ((tv + resta) / 2 - top.vap) / resta * 100 : 999;
+    if (sm && sm.kind === "turno2") conta = `<span class="ct-ok">2º TURNO GARANTIDO</span><div class="ct-big">Ninguém consegue mais passar de 50% dos votos válidos</div><div class="sub">Faltam cerca de ${fmtCurto(resta)} de votos válidos.</div>`;
+    else if (sm && sm.kind === "eleito") conta = `<span class="ct-ok">VITÓRIA NO 1º TURNO GARANTIDA</span><div class="ct-big">${esc(nomeCurto(top))} já passou da metade dos votos possíveis</div>`;
+    else conta = `<div class="ct-big">Para vencer no 1º turno, ${esc(nomeCurto(top))} precisa de ${pp2(Math.max(0, precisa))}% dos votos que faltam</div><div class="ct-l"><span>hoje tem ${pf(top.vap / tv * 100)}</span><span>faltam ~${fmtCurto(resta)} de votos</span></div>`;
+  }
+  $("clConta").innerHTML = `<h3>🧮 A conta da virada</h3>${conta}
+    <div class="kv" style="margin-top:8px"><span>Diferença</span><b class="num">${t ? `${pp2(Math.abs(r.pa - r.pb))} p.p. · ${fmtCurto(d)} de votos` : "—"}</b></div>
+    ${state.turno === "1" && sm && sm.kind === "turno2" ? `<div class="kv"><span>2º turno</span><b>25 de outubro</b></div>` : ""}`;
+  // ---- demais candidatos (só no 1º turno)
+  const outros = (br.cands || []).filter(c => c.n !== A.n && c.n !== B.n).sort((x, y) => y.vap - x.vap), vv = br.vv || 1;
+  $("clOutros").hidden = !outros.length;
+  if (outros.length) {
+    const resto = outros.slice(3), rv = resto.reduce((x, c) => x + c.vap, 0);
+    $("clOutros").innerHTML = `<h3>Demais candidatos</h3>` + outros.slice(0, 3).map(c => `<div class="oc">${fotoTag(c)}<div><b>${esc(nomeBonito(c.nm))}</b><small>${esc(c.sg)} ${esc(c.n)}</small></div><b class="num">${pf(c.vap / vv * 100)}</b></div>`).join("")
+      + (resto.length ? `<div class="sub" style="margin-top:6px">Mais ${resto.length} candidatura${resto.length > 1 ? "s" : ""} somam ${pf(rv / vv * 100)}</div>` : "");
+  }
+  // ---- placar das regiões: cabo de força em cada região
+  $("clReg").innerHTML = [...Object.entries(REGIOES), ["Exterior", ["zz"]]].map(([nome, ufs]) => {
+    const g = somar(state.files, ufs, A.n, B.n), tt = g.a + g.b, pa = tt ? g.a / tt * 100 : 50, lado = !tt || g.a === g.b ? "" : g.a > g.b ? "la" : "lb";
+    return `<div class="rg2"><div class="h"><span>${nome === "Exterior" ? "🌐 " : ""}${esc(nome)}</span><small>${pf(g.pst)} apurado</small></div>
+      <div class="tw2 ${lado}"><i style="left:0;width:${pa}%;background:var(--a)"></i><i style="right:0;width:${100 - pa}%;background:var(--b)"></i><u></u><b class="num">${g.vv ? pf(g.pa) : "—"}</b><b class="num">${g.vv ? pf(g.pb) : "—"}</b></div></div>`;
+  }).join("");
+  $("clChart").innerHTML = `<div class="ch">${grafico(A, B)}</div>`;
+}
 function renderFeed() {
   const el = $("gmFeed"); if (!el) return;
   $("gmFeedN").textContent = GM.feed.length;
+  if ($("clFeed")) $("clFeed").innerHTML = GM.feed.length ? GM.feed.slice(0, 7).map(e => `<div class="cf-ev"><time>${e.t.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</time><span>${e.txt}</span></div>`).join("") : '<div class="sub">As viradas, os estados garantidos e os eleitos aparecem aqui assim que acontecerem.</div>';
   $("gmFeedU").innerHTML = GM.feed.length ? `Última: ${GM.feed[0].txt} · ${GM.feed[0].t.toLocaleTimeString("pt-BR")}` : "Nenhuma ainda · toque para ver";
   el.innerHTML = GM.feed.length ? GM.feed.map(e => `<div class="gm-ev" style="border-left-color:${e.cor}"><time>${e.t.toLocaleTimeString("pt-BR")}</time><span>${e.txt}</span></div>`).join("")
     : '<div class="gm-ev"><span class="sub">As viradas e os estados garantidos aparecem aqui assim que acontecerem (a partir do momento em que você abriu a página).</span></div>';
@@ -898,7 +1093,7 @@ function jogoPres(r, A, B) {
   const pp = Math.abs(r.pa - r.pb).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const lead = !t ? "Aguardando os primeiros votos"
     : win >= 0 && fim ? `${esc(nomeCurto(win ? B : A))} é eleito presidente com ${pf(win ? r.pb : r.pa)} dos votos válidos`
-    : t2 && fim ? `${esc(nomeCurto(A))} e ${esc(nomeCurto(B))} vão ao 2º turno`
+    : t2 && fim ? `${esc(nomeCurto(ladoBr === 1 ? B : A))} e ${esc(nomeCurto(ladoBr === 1 ? A : B))} vão ao 2º turno`
     : ladoBr < 0 ? "Empate"
     : `${esc(nomeCurto(ladoBr ? B : A))} ${win >= 0 ? "vence a batalha por" : "à frente por"} ${pp} p.p. (${nf.format(Math.abs(r.a - r.b))} votos)`;
   $("gmLead").innerHTML = `<span>${lead}</span>${win >= 0 ? `<span class="gm-seal">${fim ? "VENCEDOR" : "RESULTADO GARANTIDO"}</span>` : t2 ? `<span class="gm-seal t2">2º TURNO GARANTIDO</span>` : ""}`;
@@ -909,7 +1104,7 @@ function jogoPres(r, A, B) {
     const gar = !!(lg && (lg.n === nA || lg.n === nB));
     if (uf !== "zz") { if (lado === 0) { la++; if (gar) ga++; } else if (lado === 1) { lb++; if (gar) gb++; } }
     const marg = g && g.vv ? Math.abs(g.pa - g.pb) : 0;
-    dados[uf] = { cor: lado >= 0 ? cor(lado) : "", forca: Math.min(1, .45 + marg / 25), gar, titulo: g && g.vv ? `${UF_NAMES[uf]}: ${nomeCurto(A)} ${pf(g.pa)} × ${nomeCurto(B)} ${pf(g.pb)} · ${pf(g.pst)} apurado` : UF_NAMES[uf] };
+    dados[uf] = { cor: lado >= 0 ? cor(lado) : "", forca: Math.min(1, .45 + marg / 25), gar, pct: g && g.vv && lado >= 0 ? Math.round(lado ? g.pb : g.pa) + "%" : "", titulo: g && g.vv ? `${UF_NAMES[uf]}: ${nomeCurto(A)} ${pf(g.pa)} × ${nomeCurto(B)} ${pf(g.pb)} · ${pf(g.pst)} apurado` : UF_NAMES[uf] };
     if (g && g.vv >= 500 && lado >= 0) {
       const ant = GM.lid[uf]; GM.lid[uf] = lado;
       if (GM.ini && ant != null && ant !== lado) { const nm = nomeCurto(lado ? B : A); gmEvento(`🔄 ${esc(nm)} virou em <b>${esc(UF_NAMES[uf])}</b>`, cor(lado), `🔄 ${nm} virou em ${UF_NAMES[uf]}`, 520); setTimeout(() => GM.mapa.piscar(uf), 50); }
@@ -977,27 +1172,39 @@ function render() {
   const br = state.br; if (!br) return;
   const [A, B] = state.par; const nA = A?.n, nB = B?.n;
   const r = resumoFile(br, nA, nB);
-  $("aNm").textContent = nomeCurto(A); $("aSg").textContent = A?.sg || "";
-  $("bNm").textContent = nomeCurto(B); $("bSg").textContent = B?.sg || "";
+  $("aNm").textContent = nomeCurto(A); $("aSg").textContent = A ? `${A.sg || ""} ${A.n}` : "";
+  $("bNm").textContent = nomeCurto(B); $("bSg").textContent = B ? `${B.sg || ""} ${B.n}` : "";
+  const fotoCl = c => c && c.sq && state.ele ? `${BASE}${state.ele.ciclo}/${state.ele.cd}/fotos/br/${c.sq}.jpeg` : "";
+  [["aImg", A], ["bImg", B]].forEach(([id, c]) => { const im = $(id), u = fotoCl(c); if (im.dataset.u === u) return; im.dataset.u = u; im.hidden = !u; im.onerror = () => { im.hidden = true; }; if (u) im.src = u; im.alt = c ? nomeCurto(c) : ""; });
   $("thA").textContent = nomeCurto(A); $("thB").textContent = nomeCurto(B);
   const chaveNomes = nomeCurto(A) + "|" + nomeCurto(B);
   if (chaveNomes !== state.rotChave) { state.rotChave = chaveNomes; rotulosSort(); }
   const comVoto = r.vv > 0;
   $("aPct").textContent = comVoto ? pf(r.pa) : "—"; $("bPct").textContent = comVoto ? pf(r.pb) : "—";
   $("aVotes").textContent = comVoto ? nf.format(r.a) + " votos" : ""; $("bVotes").textContent = comVoto ? nf.format(r.b) + " votos" : "";
-  const tot = r.pa + r.pb || 1;
-  $("brSplit").innerHTML = `<i class="sa" style="width:${r.pa / tot * 100}%"></i><i class="sb" style="width:${r.pb / tot * 100}%"></i>`;
+  // cada lado da barra = % do candidato sobre os votos válidos; o meio vazio são os demais candidatos
+  $("brSplit").querySelector(".cl-fa").style.width = (comVoto ? r.pa : 0) + "%";
+  $("brSplit").querySelector(".cl-fb").style.width = (comVoto ? r.pb : 0) + "%";
+  $("brSplit").querySelector(".cl-fa").classList.toggle("lid", comVoto && r.a > r.b);
+  $("brSplit").querySelector(".cl-fb").classList.toggle("lid", comVoto && r.b > r.a);
+  if (comVoto && r.a !== r.b) $(r.a > r.b ? "aNm" : "bNm").innerHTML = (r.a > r.b ? "" : '<span class="cr">👑</span>') + esc(nomeCurto(r.a > r.b ? A : B)) + (r.a > r.b ? '<span class="cr">👑</span>' : "");
   const d = r.pa - r.pb;
-  $("brLead").textContent = !comVoto ? "Aguardando os primeiros votos." : Math.abs(d) < 0.005 ? "Empate técnico" : `${nomeCurto(d > 0 ? A : B)} à frente por ${Math.abs(d).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} p.p. (${nf.format(Math.abs(r.a - r.b))} votos)`;
-  const sm = statusMaioria(br);
+  const sm = statusMaioria(br), fimCl = br.tf === "s";
+  const nmA = `<span class="a">${esc(nomeCurto(A))}</span>`, nmB = `<span class="b">${esc(nomeCurto(B))}</span>`;
+  $("brLead").innerHTML = !comVoto ? "Aguardando os primeiros votos"
+    : sm && sm.kind === "eleito" && fimCl ? `${sm.cand.n === B?.n ? nmB : nmA} é eleito presidente`
+    : sm && sm.kind === "turno2" && fimCl ? `${d >= 0 ? nmA : nmB} e ${d >= 0 ? nmB : nmA} vão ao 2º turno`
+    : Math.abs(d) < 0.005 ? "Empate técnico"
+    : `${d > 0 ? nmA : nmB} lidera por ${fmtCurto(Math.abs(r.a - r.b))} de votos`;
   const dec = {}; for (const uf of [...UFS, "zz"]) { const f = state.files[uf]; const l = f && liderGarantido(f); if (l) dec[l.n] = (dec[l.n] || 0) + 1; }
   const decTxt = [A, B].filter(Boolean).map(c => dec[c.n] ? `${nomeCurto(c)} ${dec[c.n]}` : "").filter(Boolean).join(" · ");
   $("brStatus").innerHTML = (sm ? (sm.kind === "eleito"
-      ? `<span class="lp ok">${esc(nomeCurto(sm.cand))} eleito no 1º turno${sm.tse ? "" : " (matemático)"}</span>`
+      ? `<span class="lp ok">${esc(nomeCurto(sm.cand))} ${state.turno === "2" ? "eleito presidente" : "eleito no 1º turno"}${sm.tse ? "" : " (matemático)"}</span>`
       : `<span class="lp warn">2º turno garantido</span>`) : "")
     + (decTxt ? ` <span class="sub">Estados com vencedor definido: ${esc(decTxt)}</span>` : "");
   $("brPst").textContent = pf(br.pst || r.pst) + " apurado";
-  $("brSec").textContent = `${nf.format(br.st)} de ${nf.format(br.ts)} urnas (seções)`;
+  $("brSec").textContent = `· ${nf.format(br.st)} de ${nf.format(br.ts)} urnas (seções)`;
+  try { classicoExtras(r, A, B, sm); } catch (e) { console.error(e); }
   $("brBar").style.width = Math.min(100, br.pst || r.pst) + "%";
 
   $("regs").innerHTML = Object.entries(REGIOES).map(([nome, ufs]) => {
@@ -1335,7 +1542,7 @@ function trocarTurno(t, aba) {
   if (t !== state.turno) {
     state.turno = t; state.ele = null; state.br = null; state.files = {}; state.par = [];
     for (const k of Object.keys(state.maj)) { state.maj[k].files = {}; state.maj[k].open.clear(); state.maj[k].alvo = []; }
-    Object.assign(GM, { lid: {}, dec: new Set(), feed: [], ini: false, majLid: {}, majDec: new Set(), majIni: false, sel: null, bat: null });
+    Object.assign(GM, { hist: [], histK: '', lid: {}, dec: new Set(), feed: [], ini: false, majLid: {}, majDec: new Set(), majIni: false, sel: null, bat: null });
     $("gmBat").innerHTML = ""; renderFeed();
   }
   aplicarTurnoUI();
@@ -1362,11 +1569,13 @@ function montarAbas() {
 /* troca entre batalha e visão clássica */
 function modoVisual(m) {
   if (m !== "classico") m = "batalha";
-  document.querySelectorAll(".vsw button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.modo === m)));
-  $("gmBatBox").hidden = m !== "batalha"; $("secBrasil").hidden = m !== "classico";
+  document.querySelectorAll(".vsw:not(.tsw) button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.modo === m)));
+  const cl = m === "classico";
+  $("clLayout").hidden = !cl; $("gmGrid").hidden = cl; $("gmFeedBox").hidden = cl; $("secReg").hidden = cl;
+  (cl ? $("clMapSlot") : $("gmMapSlot")).appendChild($("mapBlock"));
   try { localStorage.setItem("modoVisual", m); } catch (e) { /* ok */ }
 }
-document.querySelectorAll(".vsw button").forEach(b => b.onclick = () => modoVisual(b.dataset.modo));
+document.querySelectorAll(".vsw:not(.tsw) button").forEach(b => b.onclick = () => modoVisual(b.dataset.modo));
 modoVisual((() => { try { return localStorage.getItem("modoVisual"); } catch (e) { return null; } })());
 $("gmSnd").textContent = GM.som ? "🔊" : "🔇";
 $("gmSnd").onclick = () => { GM.som = !GM.som; try { localStorage.setItem("som", GM.som ? "1" : "0"); } catch (e) { /* ok */ } $("gmSnd").textContent = GM.som ? "🔊" : "🔇"; gmBip(700); };
