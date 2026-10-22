@@ -424,6 +424,8 @@ details.fx .gm-feed,details.fx .feed{max-height:360px;overflow-y:auto;margin-top
   .clc{padding:9px 12px}.clc h3{margin-bottom:6px;font-size:1rem}
   .rg{padding:4px 0}.kv{padding:2px 0}.oc{padding:4px 0}
   .ct-big{font-size:1.3rem;margin-bottom:4px}
+  .oc{grid-template-columns:26px minmax(0,1fr) auto;padding:3px 0}.oc img,.oc .ph{width:26px;height:26px}
+  .oc small{display:inline;margin-left:6px}
   #secBrasil .cl{margin-top:6px}.cl-ap{margin-top:4px}
 }
 .clc.conta{border-color:color-mix(in srgb,var(--ok) 45%,var(--line));box-shadow:0 0 24px color-mix(in srgb,var(--ok) 12%,transparent)}
@@ -519,7 +521,8 @@ details.fx .gm-feed,details.fx .feed{max-height:360px;overflow-y:auto;margin-top
 #exList{max-height:560px;overflow-y:auto;padding-right:4px}
 .exr{padding:7px 0;border-top:1px solid var(--line)}.exr:first-child{border-top:0}.exr.sel{background:color-mix(in srgb,var(--ink) 8%,transparent);border-radius:8px}
 .exr .h{display:flex;justify-content:space-between;gap:8px;font-size:.88rem}.exr .h small{color:var(--ink2)}
-.exr .tw2 b{text-shadow:none}.exr .tw2 b:first-of-type{color:color-mix(in srgb,var(--a) 22%,#000)}.exr .tw2 b:last-of-type{color:color-mix(in srgb,var(--b) 22%,#000)}
+.rg2 .tw2 b{text-shadow:none}.rg2 .tw2 b:first-of-type{color:color-mix(in srgb,var(--a) 22%,#000)}.rg2 .tw2 b:last-of-type{color:color-mix(in srgb,var(--b) 22%,#000)}
+.cl-fa,.cl-fa b{color:color-mix(in srgb,var(--a) 22%,#000)}.cl-fb,.cl-fb b{color:color-mix(in srgb,var(--b) 22%,#000)}.cl-fa span,.cl-fb span{opacity:1;font-weight:600}
 .gm-hd{display:flex;justify-content:space-between;align-items:center;gap:6px 12px;flex-wrap:wrap}
 .gm-hd .gm-lead{margin-top:0;justify-content:flex-end;font-size:.95rem}
 /* clássico: quem perdeu fica apagado */
@@ -1084,7 +1087,7 @@ const CENTRO_UF = {"ac":[70.3,235.7,17.1],"al":[585.9,234.5,8.1],"ap":[346.6,62.
 let MAPA_ESTILO = "tonal";
 function criarMapa(el, aoClicar) {
   // estados pequenos: no computador, chips ao lado do mapa ligados ao estado; no celular, faixa de chips abaixo do mapa
-  const CHIP = { rn: 166, pb: 194, pe: 222, al: 250, se: 278, df: 330, es: 392, rj: 424 };
+  const CHIP = { rn: 146, pb: 179, pe: 212, al: 245, se: 278, df: 332, es: 392, rj: 426 }, CX = 618;
   const EXT = [560, 620, 30];
   el.innerHTML = `<svg class="bm" viewBox="0 0 712 660" role="img" aria-label="Mapa do Brasil por estado">
     ${Object.entries(BR_PATHS).map(([u, d]) => `<path data-uf="${u}" d="${d}"><title></title></path>`).join("")}
@@ -1147,11 +1150,11 @@ function criarMapa(el, aoClicar) {
     });
     cx.querySelectorAll("g.bx").forEach(g => {
       const t = g.querySelector("text"), rc = g.querySelector("rect");
-      let f = 13.5; t.style.fontSize = f + "px"; let b = t.getBBox();
-      const max = 712 - 630 - 4; if (b.width + 14 > max) { f = f * (max - 14) / b.width; t.style.fontSize = f + "px"; b = t.getBBox(); }
-      const w = Math.max(56, b.width + 14), h = Math.max(22, b.height + 6), yy = +g.dataset.y;
+      let f = Math.min(19, Math.max(15, 15 / esc)); t.style.fontSize = f + "px"; let b = t.getBBox();
+      const max = 712 - CX - 2; if (b.width + 14 > max) { f = f * (max - 14) / b.width; t.style.fontSize = f + "px"; b = t.getBBox(); }
+      const w = Math.max(56, b.width + 14), h = Math.min(31, Math.max(24, b.height + 7)), yy = +g.dataset.y;
       rc.setAttribute("width", w.toFixed(1)); rc.setAttribute("height", h.toFixed(1)); rc.setAttribute("y", (yy - h / 2).toFixed(1)); rc.setAttribute("rx", (h / 2).toFixed(1));
-      t.setAttribute("x", (630 + w / 2).toFixed(1)); t.setAttribute("y", (yy + b.height * .32).toFixed(1));
+      t.setAttribute("x", (CX + w / 2).toFixed(1)); t.setAttribute("y", (yy + b.height * .32).toFixed(1));
     });
   }
   function desenhar(dados, sel) {
@@ -1172,9 +1175,9 @@ function criarMapa(el, aoClicar) {
       faixa.innerHTML = "";
       cx.innerHTML = Object.entries(CHIP).map(([u, y]) => {
         const d = dados[u] || {}, [x0, y0] = centros[u];
-        return `<line x1="${x0}" y1="${y0}" x2="630" y2="${y}" class="cl"/><circle cx="${x0}" cy="${y0}" r="2.2" class="pt"/>
-          <g class="bx${sel === u ? " sel" : ""}" data-uf="${u}" data-y="${y}"><rect x="630" y="${y - 12}" width="80" height="24" rx="12" data-uf="${u}" style="fill:${d.cor ? mistura(d, 1) : "var(--jg-ground)"}"><title>${d.titulo || ""}</title></rect>
-          <text x="670" y="${y + 5}" class="${d.cor ? "" : "vz"}" style="fill:${corTexto(d)}">${txtChip(u, d)}</text></g>`;
+        return `<line x1="${x0}" y1="${y0}" x2="${CX}" y2="${y}" class="cl"/><circle cx="${x0}" cy="${y0}" r="2.2" class="pt"/>
+          <g class="bx${sel === u ? " sel" : ""}" data-uf="${u}" data-y="${y}"><rect x="${CX}" y="${y - 12}" width="80" height="24" rx="12" data-uf="${u}" style="fill:${d.cor ? mistura(d, 1) : "var(--jg-ground)"}"><title>${d.titulo || ""}</title></rect>
+          <text x="${CX + 40}" y="${y + 5}" class="${d.cor ? "" : "vz"}" style="fill:${corTexto(d)}">${txtChip(u, d)}</text></g>`;
       }).join("");
     }
     lb.innerHTML = Object.entries(centros).filter(([u]) => !CHIP[u]).map(([u, [x, y]]) => {
