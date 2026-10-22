@@ -249,7 +249,8 @@ table.st{min-width:0}table.st td.sen{min-width:240px;white-space:normal}
 .bt-banner{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%) scale(.3);opacity:0;font:900 clamp(26px,8vw,48px)/1 system-ui,sans-serif;padding:10px 22px;border-radius:14px;white-space:nowrap;pointer-events:none;z-index:3;text-shadow:0 2px 8px rgba(0,0,0,.4)}
 .bt-banner.a{background:var(--a)}.bt-banner.b{background:var(--b)}
 .bt-banner.on{animation:btbn 1.8s ease-out}
-.bt-banner.fixo{opacity:1;transform:translate(-50%,-50%) scale(1);top:auto;bottom:30px;font-size:clamp(16px,4.5vw,24px);box-shadow:0 0 24px #ffd84d}
+.bt-banner.fixo{opacity:1;transform:translateX(-50%);bottom:auto;top:calc(42px + (100% - 72px) / 8);font-size:clamp(13px,3.6vw,18px);padding:6px 14px;box-shadow:0 0 18px #ffd84d}
+@media (max-width:600px){.bt-banner.fixo{top:40px}}
 @keyframes btbn{0%{opacity:0;transform:translate(-50%,-50%) scale(.3) rotate(-6deg)}15%{opacity:1;transform:translate(-50%,-50%) scale(1.15) rotate(2deg)}30%{transform:translate(-50%,-50%) scale(1)}80%{opacity:1}100%{opacity:0}}
 @media (max-width:480px){.bt-arena{min-height:220px}.bt-top{font-size:10.5px}}
 @media (prefers-reduced-motion:reduce){.bt.shake,.bt-mid,.bt-side.lider .bt-glow{animation:none}.bt-banner.on{animation:none;opacity:1;transform:translate(-50%,-50%)}}
