@@ -282,6 +282,37 @@ details.fx[open] .fxu{display:none}
 details.fx[open]{padding-bottom:12px}
 details.fx .gm-feed,details.fx .feed{max-height:360px;overflow-y:auto;margin-top:0}
 .gm{--fx-bd:var(--line);--fx-mut:var(--ink2);--fx-bg:var(--panel)}
+.nav2{display:flex;flex-wrap:wrap;gap:10px;align-items:center;min-width:0}
+.nav2 .tabs{flex:1;min-width:0}
+.vsw.tsw{justify-self:auto;flex:none}
+@media (max-width:600px){.nav2 .tabs{flex-basis:100%}}
+.gm-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
+.gm-c1,.gm-c2{min-width:0}
+@media (min-width:1180px){
+  .wrap{max-width:1280px}
+  .gm-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px;align-items:start}
+  .gm-c2>h2:first-child{margin-top:0}
+}
+.gm-hud.um{grid-template-columns:repeat(2,1fr)}
+/* governadores do 2º turno */
+.gv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px;margin-top:12px}
+.gv{border:1px solid var(--line);border-radius:14px;padding:12px;background:var(--panel);min-width:0}
+.gv-t{display:flex;justify-content:space-between;align-items:center;gap:8px;font-family:var(--f-disp);font-weight:700;font-size:1.15rem}
+.gv-d{display:grid;grid-template-columns:1fr auto 1fr;gap:6px;align-items:center;margin-top:8px}
+.gv-p{display:flex;flex-direction:column;align-items:center;text-align:center;min-width:0}
+.gv-f{position:relative;width:64px;height:64px;border-radius:50%;overflow:hidden;background:var(--track);display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--ink2);border:3px solid transparent}
+.gv-p.l .gv-f{border-color:var(--c1)}.gv-p.r .gv-f{border-color:var(--c2)}
+.gv-p.lid .gv-f{box-shadow:0 0 0 3px #ffd84d}
+.gv-f img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 25%}
+.gv-n{font-weight:700;font-size:.9rem;margin-top:6px;line-height:1.15;overflow-wrap:anywhere}
+.gv-pc{font-family:var(--f-disp);font-weight:800;font-size:1.6rem;line-height:1.1}
+.gv-p.l .gv-pc{color:var(--c1)}.gv-p.r .gv-pc{color:var(--c2)}
+.gv-v{font-size:.78rem;color:var(--ink2)}
+.gv-x{font-family:var(--f-disp);font-weight:800;color:var(--ink2)}
+.gv-bar{display:flex;height:10px;border-radius:99px;overflow:hidden;background:var(--track);margin-top:10px}
+.gv-bar i{display:block;height:100%;transition:width .6s}
+.gv-s{font-size:.8rem;color:var(--ink2);margin-top:6px;text-align:center}
+.gv .gm-seal{animation:none}
 /* ===== modo jogo ===== */
 .gm h2{margin-top:16px}
 .gm-vs{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:end}
@@ -335,10 +366,17 @@ details.fx .gm-feed,details.fx .feed{max-height:360px;overflow-y:auto;margin-top
       <span class="pill" id="pill"><i></i><span id="pillTxt">Conectando</span></span>
       <span id="upd">—</span>
       <button type="button" id="gmSnd" title="Som dos eventos">🔇</button>
+      <button type="button" id="share" title="Copiar o link desta tela">🔗 Compartilhar</button>
       <button type="button" id="refresh">Atualizar agora</button>
     </div>
   </div>
-  <nav class="tabs" id="tabs" aria-label="Cargo"></nav>
+  <div class="nav2">
+    <div class="vsw tsw" id="turnoSw" role="group" aria-label="Turno">
+      <button type="button" data-t="1" aria-pressed="false">1º turno</button>
+      <button type="button" data-t="2" aria-pressed="false">2º turno</button>
+    </div>
+    <nav class="tabs" id="tabs" aria-label="Cargo"></nav>
+  </div>
   <div id="notice" hidden></div>
 
   <div class="view" id="v-presidente">
@@ -346,7 +384,11 @@ details.fx .gm-feed,details.fx .feed{max-height:360px;overflow-y:auto;margin-top
     <button type="button" data-modo="batalha" aria-pressed="true">🎮 Batalha</button>
     <button type="button" data-modo="classico" aria-pressed="false">📊 Clássico</button>
   </div>
-  <section class="panel" id="secBrasil" aria-labelledby="hBr" hidden>
+  <section class="panel gm" aria-labelledby="hGm">
+    <div class="gm-grid"><div class="gm-c1">
+    <div id="gmBatBox"><h2 id="hGm">Batalha ao vivo</h2>
+    <div id="gmArena" style="margin-top:12px"><div id="gmBat"></div><div class="gm-lead" id="gmLead"></div></div></div>
+    <div id="secBrasil" hidden>
     <h2 id="hBr">Brasil</h2>
     <div class="score" style="margin-top:12px">
       <div class="cand a"><div class="who"><span id="aNm">—</span><small id="aSg"></small></div><div class="pct num" id="aPct">—</div><div class="votes num" id="aVotes"></div></div>
@@ -360,15 +402,14 @@ details.fx .gm-feed,details.fx .feed{max-height:360px;overflow-y:auto;margin-top
       <div class="bar"><i id="brBar" style="width:0%"></i></div>
       <div class="foot" style="margin-top:6px">Percentuais sobre votos válidos. “Apurado” é a parcela das urnas (seções) já totalizadas pelo TSE.</div>
     </div>
-  </section>
-  <section class="panel gm" aria-labelledby="hGm">
-    <div id="gmBatBox"><h2 id="hGm">Batalha ao vivo</h2>
-    <div id="gmArena" style="margin-top:12px"><div id="gmBat"></div><div class="gm-lead" id="gmLead"></div></div></div>
+    </div>
     <div class="gm-hud" id="gmHud"></div>
+    </div><div class="gm-c2">
     <h2>Mapa de territórios</h2>
     <div id="gmMap"></div>
     <div class="gm-leg" id="gmLeg"></div>
     <div class="gm-det" id="gmDet" hidden></div>
+    </div></div>
     <details class="fx" id="gmFeedBox"><summary>🔄 Viradas e conquistas <span class="fxn" id="gmFeedN">0</span><span class="fxu" id="gmFeedU">Toque para ver</span></summary>
     <div class="gm-feed" id="gmFeed"></div></details>
     <div class="sub" style="margin-top:10px">Fotos: divulgação oficial do TSE. Mapa: Victor Cazanave (svg-maps), licença CC BY 4.0, simplificado.</div>
@@ -519,7 +560,21 @@ function somar(files, chaves, nA, nB) {
 }
 function resumoFile(f, nA, nB) { return somar({ x: f }, ["x"], nA, nB); }
 // eleição estadual de 2026 que contém o cargo na UF (prefere o turno pedido; senado e deputados só têm 1º turno)
-function eleicaoDe(cfg, uf, cargo, turnoPref) {
+// eleição de Presidente de um turno específico ("1" ou "2")
+function eleicaoTurno(cfg, turno) {
+  for (const pl of cfg.pl || []) {
+    if (pl.c !== "ele2026") continue;
+    for (const e of pl.e || []) {
+      const br = (e.abr || []).find(a => a.cd === "br");
+      if (br && (br.cp || []).some(c => c.cd === "1") && String(e.t) === String(turno)) {
+        const [d, m, y] = (pl.dt || "").split("/").map(Number);
+        return { cd: e.cd, t: String(e.t), ciclo: pl.c, data: new Date(y, (m || 1) - 1, d || 1) };
+      }
+    }
+  }
+  return null;
+}
+function eleicaoDe(cfg, uf, cargo, turnoPref, exato) {
   const achadas = [];
   for (const pl of cfg.pl || []) {
     if (pl.c !== "ele2026") continue;
@@ -529,7 +584,7 @@ function eleicaoDe(cfg, uf, cargo, turnoPref) {
     }
   }
   achadas.sort((a, b) => a.t.localeCompare(b.t));
-  return achadas.find(e => e.t === String(turnoPref)) || achadas[0] || null;
+  return achadas.find(e => e.t === String(turnoPref)) || (exato ? null : achadas[0]) || null;
 }
 const cargoUrl = (ele, uf, cargo) => `${BASE}${ele.ciclo}/${ele.cd}/dados/${uf}/${uf}-c${pad(cargo, 4)}-e${pad(ele.cd, 6)}-u.json`;
 
@@ -545,7 +600,7 @@ function parseCargo(d) {
         const pvRaw = c.pvapn != null && c.pvapn !== "" ? c.pvapn : c.pvap;
         const stc = String(c.st || "").trim(), sgc = p.sg || "—";
         if (eleito(stc)) { ag.eleitos++; ag.porSg[sgc] = (ag.porSg[sgc] || 0) + 1; }
-        const o = { n: c.n, nm: c.nmu || c.nm || "", sg: p.sg || "", vap: num(c.vap), pv: dec(pvRaw), st: stc, dvt: String(c.dvt || ""), fl: "" };
+        const o = { n: c.n, nm: c.nmu || c.nm || "", sg: p.sg || "", vap: num(c.vap), pv: dec(pvRaw), st: stc, dvt: String(c.dvt || ""), fl: "", sq: String(c.sqcand || "") };
         ag.cands.push(o); cands.push(o);
       }
     }
@@ -678,7 +733,7 @@ const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;"
 const pf = v => (isFinite(v) ? v : 0).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "%";
 const nf = new Intl.NumberFormat("pt-BR");
 const qs = new URLSearchParams(location.search);
-const state = { ele: null, br: null, files: {}, par: [], sort: "regiao", passo: 1, lido: null,
+const state = { turno: "1", ele: null, br: null, files: {}, par: [], sort: "regiao", passo: 1, lido: null,
   tab: "presidente", cfg: null, cfgAt: 0, passoC: 1,
   maj: { governador: { files: {}, open: new Set(), sort: "regiao" }, senador: { files: {}, open: new Set(), sort: "regiao" } },
   prop: { federal: { uf: "sp", data: null, q: "", modo: "eleitos", br: null }, estadual: { uf: "sp", data: null, q: "", modo: "eleitos", br: null } } };
@@ -840,7 +895,12 @@ function jogoPres(r, A, B) {
   const foto = c => { const sq = c.sq, ele = state.ele; return sq && ele ? `${BASE}${ele.ciclo}/${ele.cd}/fotos/br/${sq}.jpeg` : ""; };
   GM.bat.set({ fotoA: foto(A), fotoB: foto(B), pctA: r.pa, pctB: r.pb, va: r.a, vb: r.b, numA: nA, numB: nB, nomeA: nomeCurto(A), nomeB: nomeCurto(B), win, apurado: br.pst || r.pst,
     rotApurado: `⏱ ${pf(br.pst || r.pst)} apurado · ${nf.format(br.st)} de ${nf.format(br.ts)} urnas<span class="sx"> (seções)</span>`, topA: ta ? "🔥 Top estados<br>" + esc(ta) : "", topB: tb ? "🔥 Top estados<br>" + esc(tb) : "" });
-  const lead = !t ? "Aguardando os primeiros votos" : ladoBr < 0 ? "Empate" : `${esc(nomeCurto(ladoBr ? B : A))} ${win >= 0 ? "vence a batalha por" : "à frente por"} ${Math.abs(r.pa - r.pb).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} p.p. (${nf.format(Math.abs(r.a - r.b))} votos)`;
+  const pp = Math.abs(r.pa - r.pb).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const lead = !t ? "Aguardando os primeiros votos"
+    : win >= 0 && fim ? `${esc(nomeCurto(win ? B : A))} é eleito presidente com ${pf(win ? r.pb : r.pa)} dos votos válidos`
+    : t2 && fim ? `${esc(nomeCurto(A))} e ${esc(nomeCurto(B))} vão ao 2º turno`
+    : ladoBr < 0 ? "Empate"
+    : `${esc(nomeCurto(ladoBr ? B : A))} ${win >= 0 ? "vence a batalha por" : "à frente por"} ${pp} p.p. (${nf.format(Math.abs(r.a - r.b))} votos)`;
   $("gmLead").innerHTML = `<span>${lead}</span>${win >= 0 ? `<span class="gm-seal">${fim ? "VENCEDOR" : "RESULTADO GARANTIDO"}</span>` : t2 ? `<span class="gm-seal t2">2º TURNO GARANTIDO</span>` : ""}`;
   // mapa + placar de estados + eventos
   let la = 0, lb = 0, ga = 0, gb = 0; const dados = {};
@@ -860,8 +920,11 @@ function jogoPres(r, A, B) {
   if (win >= 0 && !GM.dec.has("br")) { GM.dec.add("br"); if (GM.ini) { const nm = nomeCurto(win ? B : A); gmEvento(`🏆 ${esc(nm)} garantiu <b>o Brasil</b>`, cor(win), `🏆 ${nm} garantiu a vitória no Brasil!`, 990); GM.bat.efeito("VITÓRIA!", win); gmConfete(); } }
   GM.dadosMapa = dados; GM.mapa.set(dados, GM.sel);
   $("gmLeg").innerHTML = `<span><i style="background:var(--a)"></i>${esc(nomeCurto(A))}</span><span><i style="background:var(--b)"></i>${esc(nomeCurto(B))}</span><span><i style="background:var(--track)"></i>sem votos / empate</span><span>✓ vencedor garantido · toque no estado</span>`;
-  $("gmHud").innerHTML = `<div><small>Estados liderando</small><b><span style="color:var(--a)">${la}</span> × <span style="color:var(--b)">${lb}</span></b></div>
-    <div><small>Estados garantidos</small><b><span style="color:var(--a)">${ga}</span> × <span style="color:var(--b)">${gb}</span></b></div>
+  const iguais = la === ga && lb === gb && la + lb > 0;
+  $("gmHud").classList.toggle("um", iguais);
+  $("gmHud").innerHTML = (iguais ? `<div><small>Estados (todos definidos)</small><b><span style="color:var(--a)">${la}</span> × <span style="color:var(--b)">${lb}</span></b></div>`
+    : `<div><small>Estados liderando</small><b><span style="color:var(--a)">${la}</span> × <span style="color:var(--b)">${lb}</span></b></div>
+    <div><small>Estados garantidos</small><b><span style="color:var(--a)">${ga}</span> × <span style="color:var(--b)">${gb}</span></b></div>`) + `
     <div><small>Urnas apuradas (TSE)</small><b>${pf(br.pst || r.pst)}</b></div>`;
   gmDetalhe(A, B);
   if (PALPITES_URL) { $("gmPal").hidden = false; $("gmPalLink").href = PALPITES_URL; }
@@ -875,6 +938,24 @@ function gmDetalhe(A, B) {
   el.innerHTML = `<b>${esc(UF_NAMES[uf])}</b>${lg ? ' <span class="gm-seal">GARANTIDO</span>' : ""}<br>
     <span style="color:var(--a)">${esc(nomeCurto(A))}: <b>${pf(g.pa)}</b> (${nf.format(g.a)})</span> · <span style="color:var(--b)">${esc(nomeCurto(B))}: <b>${pf(g.pb)}</b> (${nf.format(g.b)})</span><br>
     <span class="sub">${pf(g.pst)} apurado · ${nf.format(g.st)} de ${nf.format(g.ts)} urnas</span>`;
+}
+function renderGovCards(tab) {
+  const box = $("m-gv-" + tab.id); if (!box) return;
+  const S = state.maj[tab.id], on = state.turno === "2" && Object.keys(S.files).length > 0;
+  box.hidden = !on; if (!on) return;
+  const ini = nm => (nm || "?").split(/\s+/).filter(Boolean).slice(0, 2).map(p => p[0]).join("");
+  $("m-gvg-" + tab.id).innerHTML = (S.alvo || []).filter(u => S.files[u]).sort((a, b) => UF_NAMES[a].localeCompare(UF_NAMES[b], "pt-BR")).map(uf => {
+    const d = S.files[uf], dois = d.cands.slice(0, 2).sort((x, y) => (+x.n) - (+y.n)); if (dois.length < 2) return "";
+    const tot = dois[0].vap + dois[1].vap, sit = situacaoMaj(d.cands, 1, d), ok = sit.kind === "ok";
+    const lid = dois[0].vap === dois[1].vap ? -1 : (dois[0].vap > dois[1].vap ? 0 : 1);
+    const lado = (c, i) => `<div class="gv-p ${i ? "r" : "l"}${lid === i ? " lid" : ""}"><div class="gv-f">${esc(ini(nomeBonito(c.nm)))}${c.sq && d.fotoBase ? `<img src="${d.fotoBase}${encodeURIComponent(c.sq)}.jpeg" alt="" loading="lazy" onerror="this.remove()">` : ""}</div>
+      <div class="gv-n">${lid === i ? "👑 " : ""}${esc(nomeBonito(c.nm))} <span class="sub">${esc(c.sg)} · ${esc(c.n)}</span></div><div class="gv-pc num">${tot ? pf(c.pv || c.vap / tot * 100) : "—"}</div><div class="gv-v num">${nf.format(c.vap)} votos</div></div>`;
+    const pa = tot ? dois[0].vap / tot * 100 : 50;
+    return `<div class="gv"><div class="gv-t"><span>${esc(UF_NAMES[uf])}</span>${ok ? `<span class="gm-seal">ELEITO: ${esc(nomeBonito(d.cands[0].nm).split(" ")[0])}</span>` : ""}</div>
+      <div class="gv-d">${lado(dois[0], 0)}<div class="gv-x">×</div>${lado(dois[1], 1)}</div>
+      <div class="gv-bar"><i style="width:${pa}%;background:var(--c1)"></i><i style="width:${100 - pa}%;background:var(--c2)"></i></div>
+      <div class="gv-s num">${pf(d.pst)} apurado · ${nf.format(d.st)} de ${nf.format(d.ts)} urnas</div></div>`;
+  }).join("");
 }
 function jogoMaj(tab) {
   if (tab.vagas !== 1) return;   // só governador
@@ -957,7 +1038,8 @@ async function carregar() {
   if (carregando) return; carregando = true; $("refresh").disabled = true;
   try {
     if (!state.ele) {
-      state.ele = escolherEleicao(await getJSON(BASE + "comum/config/ele-c.json", false, fetch.bind(window)), new Date());
+      const cfg = await obterCfg();
+      state.ele = eleicaoTurno(cfg, state.turno) || escolherEleicao(cfg, new Date());
       if (!state.ele) { aviso("<b>O TSE ainda não publicou a eleição de 2026.</b>A página tenta de novo sozinha a cada 10 segundos."); setPill("", "Aguardando"); return; }
     }
     let br;
@@ -1028,7 +1110,7 @@ function montarMaj(tab) {
   const el = $("v-" + tab.id), S = state.maj[tab.id];
   const dif = tab.topN === 2 ? "1º × 2º" : "2º × 3º";
   const ths = Array.from({ length: tab.topN }, (_, k) => `<th class="cd${k === 2 ? " c3" : ""}">${k + 1}º colocado</th>`).join("");
-  el.innerHTML = `${tab.vagas === 2 ? `<section class="panel" id="m-seats-${tab.id}"></section>` : ""}
+  el.innerHTML = `${tab.vagas === 2 ? `<section class="panel" id="m-seats-${tab.id}"></section>` : ""}${tab.vagas === 1 ? `<section class="panel" id="m-gv-${tab.id}" hidden><h2>Batalhas do 2º turno</h2><div class="gv-grid" id="m-gvg-${tab.id}"></div></section>` : ""}
     <section class="panel"><h2>${esc(tab.titulo)}</h2>
     <div class="stats" id="m-stats-${tab.id}"></div>
     <div class="tools" id="m-tools-${tab.id}"><span>Ordenar por</span></div>
@@ -1051,7 +1133,8 @@ function renderSeats(tab) {
 }
 function renderMaj(tab) {
   const S = state.maj[tab.id], topN = tab.topN;
-  const linhas = UFS.map(uf => ({ uf, d: S.files[uf], reg: UF_REGIAO[uf] }));
+  const lista = state.turno === "2" ? UFS.filter(u => (S.alvo || []).includes(u)) : UFS;
+  const linhas = lista.map(uf => ({ uf, d: S.files[uf], reg: UF_REGIAO[uf] }));
   const tem = x => x.d && x.d.cands.some(c => c.vap > 0);
   const dif = x => (tem(x) ? (x.d.cands[topN - 2]?.pv ?? 0) - (x.d.cands[topN - 1]?.pv ?? 0) : null);
   const ordem = {
@@ -1064,7 +1147,7 @@ function renderMaj(tab) {
   const tot = { st: 0, ts: 0, n: 0, ok: 0, t2: 0 };
   for (const uf of UFS) { const d = S.files[uf]; if (!d) continue; tot.st += d.st; tot.ts += d.ts; tot.n++; const sj = situacaoMaj(d.cands, tab.vagas, d); if (sj.kind === "ok") tot.ok++; if (d.t2) tot.t2++; }
   $("m-stats-" + tab.id).innerHTML = `<span><b class="num">${pf(tot.ts ? tot.st / tot.ts * 100 : 0)}</b> das urnas apuradas (${nf.format(tot.st)} de ${nf.format(tot.ts)})</span>
-    <span><b class="num">${tot.ok}</b> ${tab.vagas === 1 ? "estados com governador eleito" : "estados com as vagas definidas"}</span>${tab.vagas === 1 ? `<span><b class="num">${tot.t2}</b> com 2º turno garantido</span>` : ""}<span>${tot.n} de 27 estados lidos</span>`;
+    <span><b class="num">${tot.ok}</b> ${tab.vagas === 1 ? "estados com governador eleito" : "estados com as vagas definidas"}</span>${tab.vagas === 1 && state.turno !== "2" ? `<span><b class="num">${tot.t2}</b> com 2º turno garantido</span>` : ""}<span>${tot.n} de ${lista.length} estados lidos</span>`;
   $("m-rows-" + tab.id).innerHTML = linhas.map(x => {
     const d = x.d, aberto = S.open.has(x.uf), sit = d ? situacaoMaj(d.cands, tab.vagas, d) : { txt: "sem dado", kind: "n" };
     const cels = Array.from({ length: topN }, (_, k) => { const c = tem(x) ? d.cands[k] : null;
@@ -1077,6 +1160,7 @@ function renderMaj(tab) {
     return main + det;
   }).join("");
   renderSeats(tab);
+  try { renderGovCards(tab); } catch (e) { console.error(e); }
   try { jogoMaj(tab); } catch (e) { console.error(e); }
 }
 async function carregarMaj(tab) {
@@ -1086,15 +1170,18 @@ async function carregarMaj(tab) {
     let falhas = 0, naoDiv = 0;
     {
       const cfg = await obterCfg();
-      const turno = (escolherEleicao(cfg, new Date()) || {}).t || "1";
-      const res = await Promise.allSettled(UFS.map(async uf => {
-        const ele = eleicaoDe(cfg, uf, tab.cargo, turno);
-        if (!ele) { const e = new Error("cargo não listado pelo TSE"); e.status = 404; throw e; }
-        return parseCargo(await getTSE(cargoUrl(ele, uf, tab.cargo), fetch.bind(window)));
+      const turno = state.turno, exato = turno === "2";
+      const alvo = UFS.filter(uf => eleicaoDe(cfg, uf, tab.cargo, turno, exato));
+      S.alvo = alvo;
+      const res = await Promise.allSettled(alvo.map(async uf => {
+        const ele = eleicaoDe(cfg, uf, tab.cargo, turno, exato);
+        const d = parseCargo(await getTSE(cargoUrl(ele, uf, tab.cargo), fetch.bind(window)));
+        d.fotoBase = `${BASE}${ele.ciclo}/${ele.cd}/fotos/${uf}/`;
+        return d;
       }));
-      res.forEach((r, i) => { if (r.status === "fulfilled") S.files[UFS[i]] = r.value; else { falhas++; if ([403, 404].includes(r.reason?.status)) naoDiv++; } });
-      if (falhas === UFS.length && !Object.keys(S.files).length) {
-        if (naoDiv === UFS.length) { setPill("", "Aguardando", tab.id); aviso("<b>O TSE ainda não divulgou este cargo.</b>A página tenta de novo sozinha a cada 10 segundos.", false, tab.id); renderMaj(tab); return; }
+      res.forEach((r, i) => { if (r.status === "fulfilled") S.files[alvo[i]] = r.value; else { falhas++; if ([403, 404].includes(r.reason?.status)) naoDiv++; } });
+      if (!alvo.length || (falhas === alvo.length && !Object.keys(S.files).length)) {
+        if (!alvo.length || naoDiv === alvo.length) { setPill("", "Aguardando", tab.id); aviso("<b>O TSE ainda não divulgou este cargo.</b>A página tenta de novo sozinha a cada 10 segundos.", false, tab.id); renderMaj(tab); return; }
         throw res[0].reason;
       }
     }
@@ -1231,12 +1318,35 @@ function atualizar(forcar) {
   if (tab.id === "presidente") return carregar();
   return tab.tipo === "maj" ? carregarMaj(tab) : carregarProp(tab, forcar === true);
 }
+/* ----- turno (1º / 2º) e endereço da tela ----- */
+const SO_T1 = ["senador", "federal", "estadual"];          // cargos que não têm 2º turno
+const turnoPadrao = () => (new Date() >= new Date(2026, 9, 25) ? "2" : "1");
+function lerHash() {
+  const m = (location.hash || "").slice(1).match(/^(?:([12])turno\/?)?([a-z]*)$/);
+  return { turno: m && m[1] || null, tab: m && m[2] || "" };
+}
+function aplicarTurnoUI() {
+  document.querySelectorAll("#turnoSw button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.t === state.turno)));
+  TABS.forEach(t => { const b = $("tab_" + t.id); b.hidden = state.turno === "2" && SO_T1.includes(t.id); });
+  const g = $("tab_governador"); if (g) g.textContent = state.turno === "2" ? "Governador (2º turno)" : "Governador";
+}
+function trocarTurno(t, aba) {
+  t = t === "2" ? "2" : "1";
+  if (t !== state.turno) {
+    state.turno = t; state.ele = null; state.br = null; state.files = {}; state.par = [];
+    for (const k of Object.keys(state.maj)) { state.maj[k].files = {}; state.maj[k].open.clear(); state.maj[k].alvo = []; }
+    Object.assign(GM, { lid: {}, dec: new Set(), feed: [], ini: false, majLid: {}, majDec: new Set(), majIni: false, sel: null, bat: null });
+    $("gmBat").innerHTML = ""; renderFeed();
+  }
+  aplicarTurnoUI();
+  irPara(aba || state.tab);
+}
 function irPara(id) {
-  if (!TABS.some(t => t.id === id)) id = "presidente";
+  if (!TABS.some(t => t.id === id) || (state.turno === "2" && SO_T1.includes(id))) id = "presidente";
   state.tab = id;
   document.querySelectorAll(".view").forEach(v => { v.hidden = v.id !== "v-" + id; });
   TABS.forEach(t => $("tab_" + t.id).setAttribute("aria-pressed", String(t.id === id)));
-  try { history.replaceState(null, "", "#" + id); } catch (e) { /* ignora */ }
+  try { history.replaceState(null, "", "#" + state.turno + "turno/" + id); } catch (e) { /* ignora */ }
   setPill("", "Carregando"); aviso(null); setUpd("—");
   atualizar();
 }
@@ -1263,7 +1373,14 @@ $("gmSnd").onclick = () => { GM.som = !GM.som; try { localStorage.setItem("som",
 $("refresh").onclick = () => atualizar(true);
 montarFerramentas();
 montarAbas();
-irPara((location.hash || "").slice(1) || "presidente");
+{ const h = lerHash(); state.turno = h.turno || turnoPadrao(); aplicarTurnoUI(); irPara(h.tab || "presidente"); }
+document.querySelectorAll("#turnoSw button").forEach(b => b.onclick = () => trocarTurno(b.dataset.t));
+window.addEventListener("hashchange", () => { const h = lerHash(); trocarTurno(h.turno || state.turno, h.tab || "presidente"); });
+$("share").onclick = async () => {
+  const url = location.href;
+  try { if (navigator.share) { await navigator.share({ title: document.title, url }); return; } } catch (e) { return; }
+  try { await navigator.clipboard.writeText(url); gmToast("🔗 Link copiado"); } catch (e) { gmToast("Copie o endereço na barra do navegador"); }
+};
 let _tick = 0;
 setInterval(() => { if (state.tab === "presidente" || (++_tick % 2 === 0)) atualizar(); }, REFRESH_S * 1000);
 </script>
