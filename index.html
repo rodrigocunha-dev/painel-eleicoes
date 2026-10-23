@@ -344,7 +344,7 @@ details.fx .gm-feed,details.fx .feed{max-height:360px;overflow-y:auto;margin-top
 #secBrasil .cl{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:end;margin-top:12px}
 .cl-f{width:64px;height:72px;border-radius:10px;object-fit:cover;object-position:50% 20%;background:var(--track)}
 .cl-f.a{box-shadow:0 0 0 3px var(--a)}.cl-f.b{box-shadow:0 0 0 3px var(--b)}
-.cl-mid{min-width:0}
+.cl-mid{min-width:0;grid-column:2}.cl-f.a{grid-column:1}.cl-f.b{grid-column:3}
 .cl-top{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:10px;align-items:baseline}
 .cl-n{font-family:var(--f-disp);font-weight:700;font-size:1.25rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cl-n small{font:600 .78rem var(--f-body);color:var(--ink2)}
@@ -420,6 +420,10 @@ details.fx .gm-feed,details.fx .feed{max-height:360px;overflow-y:auto;margin-top
   .cl-l{grid-column:1 / -1;grid-row:2;grid-template-columns:1fr 1fr}
 }
 .bm{max-width:680px}
+.gm.btf .bt-face{width:var(--btf)!important}
+.aperta .clc{padding:8px 12px}.aperta .clc h3{font-size:.95rem;margin-bottom:4px}.aperta .ct-big{font-size:1.15rem;margin-bottom:2px}
+.aperta .kv{padding:1px 0;font-size:.85rem}.aperta .oc{padding:2px 0;font-size:.82rem}.aperta .oc img,.aperta .oc .ph{width:22px;height:22px}
+.aperta .rg2{padding:3px 0}.aperta .rg2 .h{font-size:.8rem}.aperta .rg2 .tw2{height:20px;margin-top:2px}.aperta .cl-l,.aperta .cl-r{gap:8px}
 @media (min-width:820px) and (max-height:940px){
   .cl-grid{gap:10px}.cl-l,.cl-r{gap:10px}
   .clc{padding:9px 12px}.clc h3{margin-bottom:6px;font-size:1rem}
@@ -1359,7 +1363,7 @@ function jogoPres(r, A, B) {
     : win >= 0 && fim ? `${esc(nomeCurto(win ? B : A))} é eleito presidente com ${pf(win ? r.pb : r.pa)} dos votos válidos`
     : t2 && fim ? `${esc(nomeCurto(ladoBr === 1 ? B : A))} e ${esc(nomeCurto(ladoBr === 1 ? A : B))} vão ao 2º turno`
     : ladoBr < 0 ? "Empate"
-    : `${esc(nomeCurto(ladoBr ? B : A))} ${win >= 0 ? "vence a batalha por" : "à frente por"} ${pp} p.p. (${nf.format(Math.abs(r.a - r.b))} votos)`;
+    : `${esc(nomeCurto(ladoBr ? B : A))} ${win >= 0 ? "vence a batalha por" : "à frente por"} ${pp} p.p. (${fmtCurto(Math.abs(r.a - r.b))} de votos)`;
   $("gmLead").innerHTML = `<span>${lead}</span>${win >= 0 ? `<span class="gm-seal">${fim ? "VENCEDOR" : "RESULTADO GARANTIDO"}</span>` : t2 ? `<span class="gm-seal t2">2º TURNO GARANTIDO</span>` : ""}`;
   // mapa + placar de estados + eventos
   let la = 0, lb = 0, ga = 0, gb = 0; const dados = {};
@@ -1854,30 +1858,60 @@ function montarAbas() {
 
 /* troca entre batalha e visão clássica */
 /* batalha na altura do mapa, sem passar da primeira tela (só no computador) */
+/* primeira tela (computador): o bloco do presidente cabe inteiro, com folga, sem rolar */
+const FOLGA_TELA = 22;
 function ajustarBatalha() {
   ajustarMapaClassico();
-  const ar = document.querySelector(".gm .bt-arena"), bt = document.querySelector(".gm .bt"), mapa = $("gmMap"), hud = $("gmHud");
-  if (!ar || !bt || !mapa) return;
-  ar.style.minHeight = "";
-  if (innerWidth < 1180 || !mapa.offsetParent) return;
+  ajustarBatalhaCore();
+  cortarPrimeiraTela();
+}
+/* o bloco seguinte não pode aparecer pela metade no fim da primeira tela: ou aparece inteiro, ou começa logo abaixo dela */
+function cortarPrimeiraTela() {
+  const lay = $("clLayout"), cl = lay && !lay.hidden;
+  ["#clLayout .cl-bx", "#gmFeedBox"].forEach(q => { const e = document.querySelector(q); if (e) e.style.marginTop = ""; });
+  if (innerWidth < 1180 || state.tab !== "presidente") return;
+  const e = document.querySelector(cl ? "#clLayout .cl-bx" : "#gmFeedBox");
+  if (!e || !e.offsetParent) return;
+  const r = e.getBoundingClientRect(), topo = r.top + scrollY, mt = parseFloat(getComputedStyle(e).marginTop) || 0;
+  if (topo < innerHeight && topo + r.height > innerHeight - 4) e.style.marginTop = Math.ceil(mt + innerHeight - topo + 24) + "px";
+}
+function ajustarBatalhaCore() {
+  const gm = document.querySelector(".gm"), ar = document.querySelector(".gm .bt-arena"), bt = document.querySelector(".gm .bt"), mapa = $("gmMap"), hud = $("gmHud");
+  if (!gm || !ar || !bt || !mapa) return;
+  ar.style.minHeight = ""; gm.classList.remove("btf"); gm.style.removeProperty("--btf");
+  if (innerWidth < 1180 || !mapa.offsetParent || !bt.offsetParent) return;
+  const limite = innerHeight - FOLGA_TELA, temHud = hud && hud.offsetParent;
+  const fimBloco = () => (temHud ? hud : bt).getBoundingClientRect().bottom + scrollY;
+  // 1) passou da tela: diminui as fotos da batalha só o necessário
+  let sobra = fimBloco() - limite;
+  if (sobra > 0) {
+    const face = bt.querySelector(".bt-face"); let w = face ? face.getBoundingClientRect().width : 170;
+    for (let i = 0; i < 3 && sobra > 0 && w > 96; i++) { w = Math.max(96, w - sobra); gm.style.setProperty("--btf", Math.round(w) + "px"); gm.classList.add("btf"); sobra = fimBloco() - limite; }
+    return;
+  }
+  // 2) sobrou espaço: estica a batalha até o fim do mapa, sem passar da tela
   const base = ar.getBoundingClientRect().height, b = bt.getBoundingClientRect(), y0 = b.top + scrollY;
-  const hudH = hud && hud.offsetParent ? hud.getBoundingClientRect().height + 14 : 0;
-  const alvoMapa = mapa.getBoundingClientRect().bottom + scrollY - hudH;        // fim do mapa
-  const alvoTela = innerHeight - hudH - 10;                                        // fim da primeira tela
-  const fim = Math.min(alvoMapa, alvoTela);
+  const hudH = temHud ? hud.getBoundingClientRect().height + 14 : 0;
+  const fim = Math.min(mapa.getBoundingClientRect().bottom + scrollY - hudH, limite - hudH);
   const extra = fim - (y0 + b.height);
   if (extra > 0) ar.style.minHeight = Math.round(base + extra) + "px";
 }
-/* modo clássico: o mapa encolhe só o necessário para caber na primeira tela */
+/* mapa (batalha e clássico) e colunas do clássico: só o necessário para caber na primeira tela */
 function ajustarMapaClassico() {
-  const svg = document.querySelector("#clMapSlot #gmMap svg");
-  document.querySelectorAll("#gmMap svg").forEach(e => { if (e !== svg) { e.style.height = ""; e.style.width = ""; } });
+  const lay = $("clLayout"), cl = lay && !lay.hidden, svg = document.querySelector("#gmMap svg");
+  if (lay) lay.classList.remove("aperta");
   if (!svg) return;
-  svg.style.height = ""; svg.style.width = "";
-  if (innerWidth < 820 || !svg.getBoundingClientRect().height) return;
-  const r = svg.getBoundingClientRect(), leg = $("gmLeg"), legH = leg && leg.offsetParent ? leg.getBoundingClientRect().height + 8 : 0;
-  const disp = innerHeight - (r.top + scrollY) - legH - 14;
-  if (r.height > disp) { svg.style.height = Math.max(380, Math.round(disp)) + "px"; svg.style.width = "auto"; svg.style.marginInline = "auto"; }
+  svg.style.height = ""; svg.style.width = ""; svg.style.marginInline = "";
+  if (innerWidth < (cl ? 820 : 1180) || !svg.getBoundingClientRect().height) return;
+  const limite = innerHeight - FOLGA_TELA;
+  if (cl && innerWidth >= 1180) {
+    const fimCol = () => Math.max(...[".cl-l", ".cl-r"].map(q => { const e = lay.querySelector(q); return e ? e.getBoundingClientRect().bottom + scrollY : 0; }));
+    if (fimCol() > limite) lay.classList.add("aperta");
+  }
+  // abaixo do mapa ainda vêm a faixa de chips (telas estreitas) e a legenda: tudo isso precisa caber
+  const r = svg.getBoundingClientRect(), leg = $("gmLeg"), abaixo = leg && leg.offsetParent ? Math.max(0, leg.getBoundingClientRect().bottom - r.bottom) : 0;
+  const disp = limite - (r.top + scrollY) - abaixo;
+  if (r.height > disp) { svg.style.height = Math.max(300, Math.round(disp)) + "px"; svg.style.width = "auto"; svg.style.marginInline = "auto"; }
 }
 let _ajB; const ajustarBatalhaLogo = () => { clearTimeout(_ajB); _ajB = setTimeout(ajustarBatalha, 60); };
 addEventListener("resize", ajustarBatalhaLogo);
